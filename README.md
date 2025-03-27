@@ -6,7 +6,7 @@
   * unit tests
   * API tests
   * component tests - selenium
-    * separate container running in docker compose, would be overkill in DRF tests
+    * seed data for postgres to make the test independent to local persistence of data
 * some APIs:
   * complete create transfer
     * update the balance, create enrties
@@ -37,9 +37,7 @@
     * python3 -m venv venv
     * source venv/bin/activate
     * pip install --upgrade pip
-    * pip install django djangorestframework djangorestframework-simplejwt psycopg2
-        * packages added to requirements.txt
-            * pip install -r requirements.txt
+    * pip install -r requirements.txt
 * create .env file and add DJANGO_SECRET_KEY
 * make startLocalEnv
 * Login in to pgadmin4 (http://localhost:8000) Django doesnt add the user!
@@ -106,6 +104,20 @@ Superuser created successfully.
 ```
 * make server
 
+## Running Tests
+
+### In docker compose
+* docker compose up --build
+* docker compose down
+
+### In vs code or using the browser
+You need 2 terminals
+* make startLocalEnv
+* make server
+* make frontend 
+
+* Use browser and http://localhost:3000
+* Configure tests in vs code panel to pytest and select component tests, use test explorer to run the tests
 
 ## Notes:
 

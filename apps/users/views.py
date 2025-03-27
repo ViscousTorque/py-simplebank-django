@@ -168,47 +168,47 @@ class UpdateUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # TODO: fix!
-# class VerifyEmailView(APIView):
-#     def post(self, request):
-#         email_id = request.data.get("email_id")
-#         secret_code = request.data.get("secret_code")
+class VerifyEmailView(APIView):
+    def post(self, request):
+        email_id = request.data.get("email_id")
+        secret_code = request.data.get("secret_code")
         
-#         if not email_id or not secret_code:
-#             return Response({"error": "Email ID and secret code are required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not email_id or not secret_code:
+            return Response({"error": "Email ID and secret code are required"}, status=status.HTTP_400_BAD_REQUEST)
         
-#         try:
-#             verify_email = VerifyEmail.objects.get(email=email_id, secret_code=secret_code, is_used=False)
-#         except ObjectDoesNotExist:
-#             return Response({"error": "Invalid email verification request"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            verify_email = VerifyEmail.objects.get(email=email_id, secret_code=secret_code, is_used=False)
+        except ObjectDoesNotExist:
+            return Response({"error": "Invalid email verification request"}, status=status.HTTP_400_BAD_REQUEST)
         
-#         verify_email.is_used = True
-#         verify_email.save()
+        verify_email.is_used = True
+        verify_email.save()
         
-#         user = User.objects.get(email=email_id)
-#         user.is_verified = True
-#         user.save()
+        user = User.objects.get(email=email_id)
+        user.is_verified = True
+        user.save()
         
-#         return Response({"is_verified": user.is_verified}, status=status.HTTP_200_OK)
+        return Response({"is_verified": user.is_verified}, status=status.HTTP_200_OK)
     
 # TODO: fix!!
-# class RenewAccessTokenView(APIView):
-#     permission_classes = [AllowAny]
+class RenewAccessTokenView(APIView):
+    permission_classes = [AllowAny]
 
-#     def post(self, request):
-#         refresh_token = request.data.get("refresh_token")
-#         if not refresh_token:
-#             return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        refresh_token = request.data.get("refresh_token")
+        if not refresh_token:
+            return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
         
-#         try:
-#             refresh = RefreshToken(refresh_token)
-#             user = User.objects.get(id=refresh.payload['user_id'])
+        try:
+            refresh = RefreshToken(refresh_token)
+            user = User.objects.get(id=refresh.payload['user_id'])
             
-#             access_token = AccessToken.for_user(user)
-#             access_token.set_exp(lifetime=timedelta(minutes=15))
+            access_token = AccessToken.for_user(user)
+            access_token.set_exp(lifetime=timedelta(minutes=15))
 
-#             return Response({
-#                 "access_token": str(access_token),
-#                 "access_token_expires_at": access_token['exp'],
-#             }, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({
+                "access_token": str(access_token),
+                "access_token_expires_at": access_token['exp'],
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)

@@ -3,8 +3,11 @@ ROOT_URLCONF = 'config.urls'
 
 ##### Dev settings
 DEBUG = True
-ALLOWED_HOSTS = []
 #####
+
+import os
+
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,backend").split(",")
 
 APPEND_SLASH = False
 
@@ -115,7 +118,13 @@ SUPPORTED_CURRENCIES = {'USD', 'EUR', 'GBP'}
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://frontend:3000",
+    "http://frontend",
+    "http://backend:5000",
+    "http://backend",
 ]
+
 
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -130,7 +139,6 @@ CORS_ALLOW_HEADERS = [
     "authorization",
     "content-type",
 ]
-
 
 CORS_ALLOW_CREDENTIALS = True
 

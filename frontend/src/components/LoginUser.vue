@@ -17,6 +17,8 @@ interface LoginResponse {
   refresh_token: string
 }
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const username = ref<string>('')
 const password = ref<string>('')
 const errorMessage = ref<string>('')
@@ -25,7 +27,7 @@ const toast = useToast()
 const handleLogin = async () => {
   try {
     const response = await axios.post<LoginResponse>(
-      'http://localhost:5000/v1/login_user',
+      `${apiBaseUrl}/v1/login_user`,
       {
         username: username.value,
         password: password.value
@@ -44,12 +46,18 @@ const handleLogin = async () => {
       detail: `You have successfully logged in.`,
       life: 3000
     })
-  } catch (error: unknown) {
+    } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      if (error.response && error.response.status === 404) {
-        errorMessage.value = error.response.data.message;
+      if (error.response) {
+        if (error.response.status === 404) {
+          errorMessage.value = error.response.data.message;
+        } else if (error.response.status === 401) {
+          errorMessage.value = 'Invalid username or password.';
+        } else {
+          errorMessage.value = 'An error occurred. Please try again later';
+        }
       } else {
-        errorMessage.value = 'An error occurred. Please try again later';
+        errorMessage.value = 'No response received from server.';
       }
     } else {
       errorMessage.value = 'An unexpected error occurred. Please try again.';

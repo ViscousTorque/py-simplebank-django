@@ -50,6 +50,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: http://backend:5000
     networks:
       - bank-network
     ports:
@@ -71,9 +73,24 @@ services:
       - POSTGRES_USER=simplebank
       - POSTGRES_PASSWORD=simplebankSecret
       - POSTGRES_HOST=postgres
+      - DJANGO_ALLOWED_HOSTS=backend,localhost
     depends_on:
       postgres:
         condition: service_healthy
+
+  component_tests:
+    build:
+      context: ./component_tests
+      dockerfile: Dockerfile.component_tests
+    networks:
+      - bank-network
+    depends_on:
+      - frontend
+      - postgres
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - APP_BASE_URL=http://frontend
 
 volumes:
   pgadmin-data:
