@@ -14,9 +14,9 @@ services:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d simple_bank_py"]
-      interval: 10s
+      interval: 2s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   pgadmin4:
     image: dpage/pgadmin4
@@ -42,9 +42,9 @@ services:
       - "53"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
+      interval: 2s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   frontend:
     build:

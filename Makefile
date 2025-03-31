@@ -79,5 +79,7 @@ frontend:
 shell:
 	python manage.py shell
 
+component_tests:
+	docker compose up --build --abort-on-container-exit
 
-.PHONY: startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell
+.PHONY: startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell component_tests
