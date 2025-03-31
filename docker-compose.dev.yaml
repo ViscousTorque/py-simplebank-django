@@ -1,0 +1,104 @@
+
+services:
+  postgres:
+    image: postgres:latest
+    networks:
+      - bank-network
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=adminSecret
+      - POSTGRES_DB=simple_bank_py
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d simple_bank_py"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    networks:
+      - bank-network
+    ports: 
+    - "8000:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=adminSecret
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - bank-network
+    ports:
+      - "6379:6379"
+      - "53"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: http://backend:5000
+    networks:
+      - bank-network
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "5000:5000"
+    networks:
+      - bank-network
+    environment:
+      - DEBUG=1
+      - POSTGRES_DB=simple_bank_py
+      - POSTGRES_USER=simplebank
+      - POSTGRES_PASSWORD=simplebankSecret
+      - POSTGRES_HOST=postgres
+      - DJANGO_ALLOWED_HOSTS=backend,localhost
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  component_tests:
+    build:
+      context: ./component_tests
+      dockerfile: Dockerfile.component_tests
+    networks:
+      - bank-network
+    depends_on:
+      - frontend
+      - postgres
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - APP_BASE_URL=http://frontend
+
+volumes:
+  pgadmin-data:
+      external: true
+  postgres-data:
+      external: true
+
+networks:
+  bank-network:
+    driver: bridge
+

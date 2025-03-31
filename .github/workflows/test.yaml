@@ -20,4 +20,4 @@ jobs:
         make --version
 
     - name: Run component tests
-      run: make component_tests
+      run: make ci_comp_tests
