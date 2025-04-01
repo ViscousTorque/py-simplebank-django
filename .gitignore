@@ -1,4 +1,4 @@
-venv
+.venv
 .env
 __pycache__
 # Ignore all migration files except __init__.py

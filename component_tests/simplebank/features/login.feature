@@ -8,8 +8,8 @@ Feature: User Login
     Then I should see "<expected_name>" in the user profile
 
     Examples:
-      | username | password       | expected_name     |
-      | viscous  | viscousSecret  | Viscous Torque |
+      | username | password      | expected_name |
+      | viscous  | viscousSecret | ViscousTorque |
 
   Scenario Outline: Unsuccessful login
     Given I open the login page
@@ -21,6 +21,5 @@ Feature: User Login
     Examples:
       | username | password  | error_message                 |
       | viscous  | wrongPass | Invalid username or password  |
-      # skip test because I think there is a bug in the frontend :-)
-      # | hacker   | hack123   | user not found                | 
+      | hacker   | hack123   | Invalid username or password  | 
       

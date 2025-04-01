@@ -3,3 +3,5 @@ pytest_bdd
 selenium>=4.10.0
 webdriver_manager
 pyvirtualdisplay
+faker
+psycopg2-binary>=2.9.0

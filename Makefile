@@ -80,10 +80,11 @@ shell:
 	python manage.py shell
 
 ci_comp_tests:
-	docker compose -f docker-compose.ci.yaml up --build --abort-on-container-exit
+	docker compose -f docker-compose.ci.yaml up --build -d postgres migrations
+	docker compose -f docker-compose.ci.yaml up --build component_tests
+	docker compose -f docker-compose.ci.yaml down
 
 dev_comp_tests:
 	docker compose -f docker-compose.dev.yaml up --build --abort-on-container-exit
-
 
 .PHONY: startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell ci_comp_tests dev_comp_tests
