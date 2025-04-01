@@ -78,7 +78,7 @@ shell:
 
 ci_comp_tests:
 	@set -e; \
-	docker compose -f docker-compose.ci.yaml build backend migrations && \
+	docker compose -f docker-compose.ci.yaml build --no-cache backend migrations unitests component_tests && \
 	docker compose -f docker-compose.ci.yaml up -d postgres migrations && \
 	docker compose -f docker-compose.ci.yaml run --rm unitests && \
 	docker compose -f docker-compose.ci.yaml run --rm component_tests; \
