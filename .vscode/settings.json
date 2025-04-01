@@ -3,5 +3,12 @@
         "component_tests"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./apps",
+        "-p",
+        "test_*.py"
+    ]
 }

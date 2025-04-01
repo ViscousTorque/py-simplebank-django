@@ -3,7 +3,9 @@
 # TODOs
 
 * Tests!! so far testing with vs code postman plugin
-  * unit tests
+  * unit tests - now wired up to run the first
+    * fix UpdateUser
+    * add more :-)
   * API tests
 * some APIs:
   * complete create transfer
@@ -127,4 +129,15 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> from django.apps import apps
 >>> apps.get_app_config('users').models
 {'user_groups': <class 'apps.users.models.User_groups'>, 'user_user_permissions': <class 'apps.users.models.User_user_permissions'>, 'user': <class 'apps.users.models.User'>, 'verifyemail': <class 'apps.users.models.VerifyEmail'>}
->>> ```
+>>> 
+```
+
+### Setting up Django unit tests
+Starting with some unit tests ... Django needs to create its db!
+Provide the user with correct permissions to create db
+```
+docker run -it --rm --network bank-network postgres   psql -h postgres -U admin -d postgres   -c "ALTER USER
+ simplebank CREATEDB;"
+Password for user admin: 
+ALTER ROLE
+```

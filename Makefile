@@ -50,9 +50,6 @@ db_docs:
 
 db_schema:
 	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
-	
-frontend:
-	cd frontend && npm run dev
 
 migrations:
 	python manage.py makemigrations
@@ -80,11 +77,24 @@ shell:
 	python manage.py shell
 
 ci_comp_tests:
-	docker compose -f docker-compose.ci.yaml up --build -d postgres migrations
-	docker compose -f docker-compose.ci.yaml up --build component_tests
-	docker compose -f docker-compose.ci.yaml down
+	@set -e; \
+	docker compose -f docker-compose.ci.yaml build unitests component_tests && \
+	docker compose -f docker-compose.ci.yaml up -d postgres migrations && \
+	docker compose -f docker-compose.ci.yaml run --rm unitests && \
+	docker compose -f docker-compose.ci.yaml run --rm component_tests; \
+	EXIT_CODE=$$?; \
+	docker compose -f docker-compose.ci.yaml down; \
+	exit $$EXIT_CODE
 
 dev_comp_tests:
 	docker compose -f docker-compose.dev.yaml up --build --abort-on-container-exit
 
-.PHONY: startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell ci_comp_tests dev_comp_tests
+unittests:
+	coverage run manage.py test --settings=config.settings_test
+	coverage report
+
+unittests-html:
+	coverage html
+	xdg-open htmlcov/index.html
+
+.PHONY: startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell ci_comp_tests dev_comp_tests unittests unittests-html

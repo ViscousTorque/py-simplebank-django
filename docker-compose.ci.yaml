@@ -121,6 +121,18 @@ services:
       - POSTGRES_PASSWORD=simplebankSecret
       - POSTGRES_HOST=postgres
 
+  unitests:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: >
+      sh -c "coverage run manage.py test --settings=config.settings_test &&
+             coverage report"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings_test
+    networks:
+    - bank-network
+
 networks:
   bank-network:
     driver: bridge

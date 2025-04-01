@@ -46,6 +46,7 @@ def seed_users(users):
     prepared_users = []
     logger.debug(f"Seeding {len(users)} user(s)...")
 
+    # TODO: use Django make_password - need to django.setup() around here
     viscous_password_hash = "pbkdf2_sha256$870000$7YSTWLvu7itubaeyqtr1L1$vVTfmhlvGcoT8LUNruN1ekm6+m+2QjKyYy7Dya02GpA="
 
     for user in users:

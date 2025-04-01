@@ -59,13 +59,10 @@ class LoginUserView(APIView):
             user = User.objects.get(username=username)
             logger.info(f"{user=}")
         except User.DoesNotExist:
+            logger.info("Authentication failed")
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
         if not check_password(password, user.hashed_password):
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if not user:
-            logger.info("Authentication failed")
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
         refresh = RefreshToken.for_user(user)
