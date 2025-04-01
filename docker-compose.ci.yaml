@@ -126,8 +126,15 @@ services:
       context: .
       dockerfile: Dockerfile.backend
     command: >
-      sh -c "coverage run manage.py test --settings=config.settings_test &&
-             coverage report"
+      sh -c "
+        echo 'Making migrations...' &&
+        python manage.py makemigrations --noinput &&
+        echo 'Running migrations...' &&
+        python manage.py migrate --noinput &&
+        echo 'Running unit tests...' &&
+        coverage run manage.py test --settings=config.settings_test &&
+        coverage report
+      "
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings_test
     networks:
