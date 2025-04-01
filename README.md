@@ -5,8 +5,6 @@
 * Tests!! so far testing with vs code postman plugin
   * unit tests
   * API tests
-  * component tests - selenium
-    * seed data for postgres to make the test independent to local persistence of data
 * some APIs:
   * complete create transfer
     * update the balance, create enrties
