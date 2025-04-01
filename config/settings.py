@@ -114,7 +114,11 @@ LOGGING = {
     },
 }
 
-SUPPORTED_CURRENCIES = {'USD', 'EUR', 'GBP'}
+SUPPORTED_CURRENCIES = [
+    ('USD', 'USD'),
+    ('EUR', 'EUR'),
+    ('GBP', 'GBP'),
+]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",

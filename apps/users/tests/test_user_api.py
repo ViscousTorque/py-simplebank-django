@@ -48,6 +48,36 @@ class LoginUserAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn("error", response.data)
 
+class CreateUserViewTest(APITestCase):
+    def setUp(self):
+        self.url = reverse('create-user')
+
+    def test_create_user_success(self):
+        payload = {
+            "username": "testuser",
+            "email": "testuser@example.com",
+            "full_name": "testuser",
+            "password": "strongpassword123"
+        }
+        response = self.client.post(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["username"], payload["username"])
+        self.assertEqual(response.data["email"], payload["email"])
+        self.assertTrue(User.objects.filter(username="testuser").exists())
+
+    def test_create_user_invalid_data(self):
+        payload = {
+            "username": "",  # Invalid: required field
+            "email": "not-an-email",  # Invalid email
+            "password": "123"  # Too short or doesn't meet validation
+        }
+        response = self.client.post(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("username", response.data)
+        self.assertIn("email", response.data)
+        self.assertIn("password", response.data)
+
+
 # Todo : fix this test, I used the wrong token :-)
 # class UpdateUserAPITest(APITestCase):
 #     def setUp(self):
