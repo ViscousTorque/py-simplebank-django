@@ -18,19 +18,6 @@ services:
       timeout: 5s
       retries: 10
 
-  pgadmin4:
-    image: dpage/pgadmin4
-    networks:
-      - bank-network
-    ports: 
-    - "8000:80"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@example.com
-      - PGADMIN_DEFAULT_PASSWORD=adminSecret
-
   redis:
     image: redis:7-alpine
     networks:

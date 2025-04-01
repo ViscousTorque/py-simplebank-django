@@ -78,7 +78,7 @@ shell:
 
 ci_comp_tests:
 	@set -e; \
-	docker compose -f docker-compose.ci.yaml build --no-cache backend migrations unitests component_tests && \
+	COMPOSE_BAKE=true docker compose -f docker-compose.ci.yaml build --no-cache backend migrations unitests component_tests && \
 	docker compose -f docker-compose.ci.yaml up -d postgres migrations && \
 	docker compose -f docker-compose.ci.yaml run --rm unitests && \
 	docker compose -f docker-compose.ci.yaml run --rm component_tests; \
@@ -87,7 +87,14 @@ ci_comp_tests:
 	exit $$EXIT_CODE
 
 dev_comp_tests:
-	docker compose -f docker-compose.dev.yaml up --build --abort-on-container-exit
+	@set -e; \
+	COMPOSE_BAKE=true docker compose -f docker-compose.dev.yaml build && \
+	docker compose -f docker-compose.dev.yaml up -d postgres migrations pgadmin4 && \
+	docker compose -f docker-compose.dev.yaml run --rm unitests && \
+	docker compose -f docker-compose.dev.yaml run --rm component_tests; \
+	EXIT_CODE=$$?; \
+	docker compose -f docker-compose.dev.yaml down; \
+	exit $$EXIT_CODE
 
 unittests:
 	coverage run manage.py test --settings=config.settings_test
