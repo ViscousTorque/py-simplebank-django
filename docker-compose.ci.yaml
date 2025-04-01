@@ -87,8 +87,8 @@ services:
         echo 'Waiting for Postgres...';
         while ! pg_isready -h postgres -U admin -d simple_bank_py; do sleep 1; done;
         echo 'Running migrations...';
-        python manage.py makemigrations &&
-        python manage.py migrate
+        python manage.py makemigrations;
+        python manage.py migrate;
       "
     depends_on:
       postgres:
