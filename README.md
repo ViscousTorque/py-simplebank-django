@@ -104,7 +104,12 @@ Superuser created successfully.
 ```
 * make server
 
-## Documentation
+## API Documentation
+
+View the API docs here:  
+[API Docs (Redoc)](https://viscoustorque.github.io/py-simplebank-django/openapi.html)
+
+## Local inspection of documentation
 Use:
 ```
 make documentation
