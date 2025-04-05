@@ -10,7 +10,7 @@
   * complete create transfer
     * update the balance, create enrties
   * renew_access_token
-* add frontend - will use Vue.js
+* do more frontend - using Vue.js
   * keep separate from DRF for future scalability
     * views
       * create_user / create_account
@@ -21,7 +21,7 @@
   * use Django jwt instead of custom - extend obj with a couple of fields
   * general and app urls.py
 * sort terraform for deployment
-* add github workflow
+* add github workflow tasks
   * deploy
 * test deployment in AWS
 * Read up a little on Django documentation:
@@ -104,7 +104,7 @@ Superuser created successfully.
 ```
 * make server
 
-## API Documentation
+# API Documentation
 
 View the API docs here:  
 [API Docs (Redoc)](https://viscoustorque.github.io/py-simplebank-django/openapi.html)
@@ -121,13 +121,13 @@ python -m http.server 7000
 ```
 Browser, open : http://localhost:7000/openapi.html
 
-## Running Tests
+# Running Tests
 
-### In docker compose
+## In docker compose
 * docker compose up --build
 * docker compose down
 
-### In vs code or using the browser
+## In vs code or using the browser
 You need 2 terminals
 * make startLocalEnv
 * make server
@@ -136,7 +136,7 @@ You need 2 terminals
 * Use browser and http://localhost:3000
 * Configure tests in vs code panel to pytest and select component tests, use test explorer to run the tests
 
-## Notes:
+# Notes:
 
 * https://docs.djangoproject.com/en/5.1/
 * python manage.py shell
@@ -149,7 +149,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> 
 ```
 
-### Setting up Django unit tests
+## Setting up Django unit tests
 Starting with some unit tests ... Django needs to create its db!
 Provide the user with correct permissions to create db
 ```
