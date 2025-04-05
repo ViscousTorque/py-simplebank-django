@@ -46,10 +46,10 @@ stopdb:
 	docker stop postgres pgadmin4
 
 db_docs:
-	dbdocs build doc/db.dbml
+	dbdocs build docs/db.dbml
 
 db_schema:
-	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
+	dbml2sql --postgres -o docs/schema.sql doc/db.dbml
 
 migrations:
 	python manage.py makemigrations
@@ -105,8 +105,9 @@ unittests-html:
 	xdg-open htmlcov/index.html
 
 documentation:
-	python manage.py spectacular --file doc/openapi-schema.yml
-	npx @redocly/cli build-docs doc/openapi-schema.yml -o doc/openapi.html
+	python manage.py spectacular --file docs/openapi-schema.yml
+	npx @redocly/cli build-docs docs/openapi-schema.yml -o docs/openapi.html
+
 
 
 .PHONY: documentation startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell ci_comp_tests dev_comp_tests unittests unittests-html

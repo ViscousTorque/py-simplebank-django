@@ -118,7 +118,7 @@ To inspect on local machine:
 ```
 cd doc
 python -m http.server 7000
-'''
+```
 Browser, open : http://localhost:7000/openapi.html
 
 ## Running Tests
