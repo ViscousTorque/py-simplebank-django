@@ -12,3 +12,4 @@ webdriver_manager
 pyvirtualdisplay
 faker
 coverage
+drf-spectacular

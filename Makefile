@@ -76,7 +76,7 @@ frontend:
 shell:
 	python manage.py shell
 
-ci_comp_tests:
+ci_tests:
 	@set -e; \
 	COMPOSE_BAKE=true docker compose -f docker-compose.ci.yaml build --no-cache backend migrations unitests component_tests && \
 	docker compose -f docker-compose.ci.yaml up -d postgres migrations && \
@@ -104,4 +104,9 @@ unittests-html:
 	coverage html
 	xdg-open htmlcov/index.html
 
-.PHONY: startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell ci_comp_tests dev_comp_tests unittests unittests-html
+documentation:
+	python manage.py spectacular --file doc/openapi-schema.yml
+	npx @redocly/cli build-docs doc/openapi-schema.yml -o doc/openapi.html
+
+
+.PHONY: documentation startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell ci_comp_tests dev_comp_tests unittests unittests-html

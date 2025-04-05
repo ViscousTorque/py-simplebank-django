@@ -1,7 +1,6 @@
 # py-simplebank-backend
 
 # TODOs
-
 * Tests!! so far testing with vs code postman plugin
   * unit tests - now wired up to run the first
     * fix UpdateUser
@@ -21,13 +20,14 @@
 * Refactoring
   * use Django jwt instead of custom - extend obj with a couple of fields
   * general and app urls.py
-* add github workflow
-  * build Django image
-* test github docker builds
 * sort terraform for deployment
 * add github workflow
   * deploy
 * test deployment in AWS
+* Read up a little on Django documentation:
+  * https://drf-spectacular.readthedocs.io/en/latest/readme.html
+* Read more on Django rest framework:
+  * https://www.django-rest-framework.org/
 
 # Setup
 
@@ -103,6 +103,18 @@ Password (again):
 Superuser created successfully.
 ```
 * make server
+
+## Documentation
+Use:
+```
+make documentation
+```
+To inspect on local machine:
+```
+cd doc
+python -m http.server 7000
+'''
+Browser, open : http://localhost:7000/openapi.html
 
 ## Running Tests
 

@@ -1,0 +1,610 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /v1/create_account:
+    post:
+      operationId: create_account_create
+      description: Creates an account for the authenticated user. The user is extracted
+        from the JWT token.
+      summary: Create a new account
+      tags:
+      - create_account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Account'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Account'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Account'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+          description: ''
+        '400':
+          description: No response body
+        '401':
+          description: No response body
+        '404':
+          description: No response body
+  /v1/create_user:
+    post:
+      operationId: create_user_create
+      description: Registers a new user and returns the user's public info.
+      summary: Create new user
+      tags:
+      - create_user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+          description: ''
+        '400':
+          description: No response body
+  /v1/get_account/{id}:
+    get:
+      operationId: get_account_retrieve
+      description: Returns a specific account if it belongs to the authenticated user.
+      summary: Retrieve account by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - get_account
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+          description: ''
+        '401':
+          description: No response body
+        '404':
+          description: No response body
+        '500':
+          description: No response body
+  /v1/list_accounts:
+    get:
+      operationId: list_accounts_list
+      description: Returns a paginated list of accounts belonging to the authenticated
+        user.
+      summary: List user's accounts
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: Number of results per page
+      tags:
+      - list_accounts
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+          description: ''
+  /v1/login_user:
+    post:
+      operationId: login_user_create
+      description: Authenticates a user and returns JWT tokens, session ID, and user
+        info.
+      summary: Login user
+      tags:
+      - login_user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          description: No response body
+        '401':
+          description: No response body
+  /v1/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /v1/transfers:
+    post:
+      operationId: transfers_create
+      description: Transfers funds from one account to another. Both accounts must
+        have the same currency and the user must own the source account.
+      summary: Create a money transfer
+      tags:
+      - transfers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transfer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Transfer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Transfer'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer'
+          description: ''
+        '400':
+          description: No response body
+        '401':
+          description: No response body
+        '404':
+          description: No response body
+  /v1/update_user:
+    patch:
+      operationId: update_user_partial_update
+      description: "\n        Partially updates a user's details.\n        - If you're\
+        \ a **regular user**, you can only update yourself.\n        - If you're a\
+        \ **banker**, you can update anyone.\n        "
+      summary: Update user
+      tags:
+      - update_user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateUser'
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUser'
+          description: ''
+        '400':
+          description: No response body
+        '403':
+          description: No response body
+        '404':
+          description: No response body
+  /v1/verify_email:
+    post:
+      operationId: verify_email_create
+      description: Validates the email and secret code. Marks user as verified if
+        correct and not used before.
+      summary: Verify user's email
+      tags:
+      - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyEmailResponse'
+          description: ''
+        '400':
+          description: No response body
+components:
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: string
+          readOnly: true
+        balance:
+          type: integer
+          readOnly: true
+        currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - balance
+      - created_at
+      - currency
+      - id
+      - owner
+    CreateUser:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 255
+        password:
+          type: string
+          writeOnly: true
+          minLength: 6
+        full_name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      required:
+      - email
+      - full_name
+      - password
+      - username
+    CurrencyEnum:
+      enum:
+      - USD
+      type: string
+      description: '* `USD` - USD'
+    LoginResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        access_token:
+          type: string
+        access_token_expires_at:
+          type: string
+          format: date-time
+        refresh_token:
+          type: string
+        refresh_token_expires_at:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/UserResponse'
+      required:
+      - access_token
+      - access_token_expires_at
+      - refresh_token
+      - refresh_token_expires_at
+      - session_id
+      - user
+    LoginUser:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+    PatchedUpdateUser:
+      type: object
+      properties:
+        username:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        hashed_password:
+          type: string
+          writeOnly: true
+          minLength: 6
+    Transfer:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        from_account_id:
+          type: integer
+        to_account_id:
+          type: integer
+        amount:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Must be positive
+        currency:
+          type: string
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - created_at
+      - currency
+      - from_account_id
+      - id
+      - to_account_id
+    UpdateUser:
+      type: object
+      properties:
+        username:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        hashed_password:
+          type: string
+          writeOnly: true
+          minLength: 6
+      required:
+      - email
+      - full_name
+      - username
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          maxLength: 255
+        full_name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password_changed_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - username
+    VerifyEmailRequest:
+      type: object
+      properties:
+        email_id:
+          type: string
+          format: email
+        secret_code:
+          type: string
+      required:
+      - email_id
+      - secret_code
+    VerifyEmailResponse:
+      type: object
+      properties:
+        is_verified:
+          type: boolean
+      required:
+      - is_verified

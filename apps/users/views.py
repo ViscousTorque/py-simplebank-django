@@ -4,12 +4,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from drf_spectacular.utils import extend_schema
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password, check_password
+from rest_framework import serializers
 from .serializers import CreateUserSerializer, UserResponseSerializer, LoginUserSerializer, UpdateUserSerializer
 from apps.users.models import VerifyEmail
 from datetime import timedelta, datetime, timezone
-from django.utils.timezone import make_aware
 from .models import User
 from apps.authentication.models import Session
 from utils.auth import get_jwt_payload
@@ -22,6 +23,14 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-default-secret-key")
 
 class CreateUserView(APIView):
     permission_classes = [AllowAny]
+    serializer_class = CreateUserSerializer
+
+    @extend_schema(
+        request=CreateUserSerializer,
+        responses={201: UserResponseSerializer, 400: None},
+        summary="Create new user",
+        description="Registers a new user and returns the user's public info."
+    )
     def post(self, request):
         serializer = CreateUserSerializer(data=request.data)
         if serializer.is_valid():
@@ -31,8 +40,22 @@ class CreateUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class LoginResponseSerializer(serializers.Serializer):
+    session_id = serializers.UUIDField()
+    access_token = serializers.CharField()
+    access_token_expires_at = serializers.DateTimeField()
+    refresh_token = serializers.CharField()
+    refresh_token_expires_at = serializers.DateTimeField()
+    user = UserResponseSerializer()
+
 class LoginUserView(APIView):
-    permission_classes = [AllowAny]
+    serializer_class = LoginUserSerializer
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            return x_forwarded_for.split(",")[0]
+        return request.META.get("REMOTE_ADDR")
 
     def get_client_ip(self, request):
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
@@ -40,6 +63,12 @@ class LoginUserView(APIView):
             return x_forwarded_for.split(",")[0]
         return request.META.get("REMOTE_ADDR")
     
+    @extend_schema(
+        request=LoginUserSerializer,
+        responses={200: LoginResponseSerializer, 400: None, 401: None},
+        summary="Login user",
+        description="Authenticates a user and returns JWT tokens, session ID, and user info.",
+    )
     def post(self, request):
 
         headers = {k: v for k, v in request.META.items() if k.startswith("HTTP_")}
@@ -120,6 +149,18 @@ class LoginUserView(APIView):
 
 
 class UpdateUserView(APIView):
+    serializer_class = UpdateUserSerializer
+
+    @extend_schema(
+        request=UpdateUserSerializer,
+        responses={200: UpdateUserSerializer, 400: None, 403: None, 404: None},
+        summary="Update user",
+        description="""
+        Partially updates a user's details.
+        - If you're a **regular user**, you can only update yourself.
+        - If you're a **banker**, you can update anyone.
+        """,
+    )
     def patch(self, request):
         payload, error_response = get_jwt_payload(request)
         if error_response:
@@ -164,8 +205,24 @@ class UpdateUserView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# TODO: check after VEView
+class VerifyEmailRequestSerializer(serializers.Serializer):
+    email_id = serializers.EmailField()
+    secret_code = serializers.CharField()
+
+class VerifyEmailResponseSerializer(serializers.Serializer):
+    is_verified = serializers.BooleanField()
+
+
 # TODO: fix!
 class VerifyEmailView(APIView):
+    @extend_schema(
+        request=VerifyEmailRequestSerializer,
+        responses={200: VerifyEmailResponseSerializer, 400: None},
+        summary="Verify user's email",
+        description="Validates the email and secret code. Marks user as verified if correct and not used before.",
+        tags=["Users"]  # Optional, for grouping in Swagger UI
+    )
     def post(self, request):
         email_id = request.data.get("email_id")
         secret_code = request.data.get("secret_code")

@@ -19,5 +19,5 @@ jobs:
         docker compose version
         make --version
 
-    - name: Run component tests
-      run: make ci_comp_tests
+    - name: Run component and unit tests
+      run: make ci_tests

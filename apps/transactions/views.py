@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from apps.accounts.models import Account
 from apps.transactions.models import Transfer
 from apps.users.models import User
+from drf_spectacular.utils import extend_schema
 from apps.transactions.serializers import TransferSerializer
 import logging
 import jwt
@@ -16,6 +17,14 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-default-secret-key")
 
 # TODO: Fix this, refactor it
 class CreateTransferView(APIView):
+    serializer_class = TransferSerializer  # Helps DRF introspect
+
+    @extend_schema(
+        request=TransferSerializer,
+        responses={201: TransferSerializer, 400: None, 401: None, 404: None},
+        summary="Create a money transfer",
+        description="Transfers funds from one account to another. Both accounts must have the same currency and the user must own the source account."
+    )
     def post(self, request):
         # JWT auth header check
         auth_header = request.headers.get('Authorization')

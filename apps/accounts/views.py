@@ -5,6 +5,7 @@ from apps.accounts.models import Account
 from apps.accounts.serializers import AccountSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.pagination import PageNumberPagination
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from django.conf import settings
 from apps.users.models import User
 from utils.auth import get_jwt_payload
@@ -16,7 +17,22 @@ logger = logging.getLogger(__name__)
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-default-secret-key")
 
+
+
 class CreateAccountView(APIView):
+    """
+    Because I am using a custom using a custom APIView, drf-spectacular doesn’t know what 
+    serializer to document unless you explicitly tell it. So I need to use serializer_class ..
+    TODO: standardise the classes?
+    """
+    serializer_class = AccountSerializer
+
+    @extend_schema(
+        request=AccountSerializer,
+        responses={201: AccountSerializer, 400: None, 401: None, 404: None},
+        summary="Create a new account",
+        description="Creates an account for the authenticated user. The user is extracted from the JWT token."
+    )
     def post(self, request):
         payload, error_response = get_jwt_payload(request)
         if error_response:
@@ -39,6 +55,13 @@ class CreateAccountView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class GetAccountView(APIView):
+    serializer_class = AccountSerializer
+
+    @extend_schema(
+        responses={200: AccountSerializer, 401: None, 404: None, 500: None},
+        summary="Retrieve account by ID",
+        description="Returns a specific account if it belongs to the authenticated user."
+    )
     def get(self, request, id):
         payload, error_response = get_jwt_payload(request)
         if error_response:
@@ -72,7 +95,17 @@ class ListAccountsView(APIView, PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 10
+    serializer_class = AccountSerializer  # optional but helps introspection
 
+    @extend_schema(
+        summary="List user's accounts",
+        description="Returns a paginated list of accounts belonging to the authenticated user.",
+        parameters=[
+            OpenApiParameter(name='page', type=OpenApiTypes.INT, location=OpenApiParameter.QUERY, required=False, description='Page number'),
+            OpenApiParameter(name='page_size', type=OpenApiTypes.INT, location=OpenApiParameter.QUERY, required=False, description='Number of results per page'),
+        ],
+        responses={200: AccountSerializer(many=True)}
+    )
     def get(self, request):
         payload, error_response = get_jwt_payload(request)
         if error_response:
