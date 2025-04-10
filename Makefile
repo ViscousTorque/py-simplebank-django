@@ -108,6 +108,4 @@ documentation:
 	python manage.py spectacular --file docs/openapi-schema.yml
 	npx @redocly/cli build-docs docs/openapi-schema.yml -o docs/openapi.html
 
-
-
 .PHONY: documentation startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell ci_comp_tests dev_comp_tests unittests unittests-html

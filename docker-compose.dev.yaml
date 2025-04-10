@@ -45,6 +45,7 @@ services:
       interval: 2s
       timeout: 5s
       retries: 10
+      
   migrations:
     build:
       context: .

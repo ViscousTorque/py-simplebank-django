@@ -1,11 +1,14 @@
-import psycopg2
-from psycopg2.extras import execute_values
+import os
 from datetime import datetime, timezone
 import logging
-import os
+import time
+
+import psycopg2
+from psycopg2.extras import execute_values
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
 
 def get_db_config():
     """
@@ -16,17 +19,17 @@ def get_db_config():
         "user": os.getenv("POSTGRES_USER", "admin"),
         "password": os.getenv("POSTGRES_PASSWORD", "adminSecret"),
         "host": os.getenv("POSTGRES_HOST", "localhost"),
-        "port": os.getenv("POSTGRES_PORT", 5432),
+        "port": os.getenv("POSTGRES_PORT", "5432"),
     }
+
 
 SEEDED_USERNAMES = []
 
-import time
 
 def get_connection(retries=5, delay=2):
     config = get_db_config()
     logger.debug(f"Trying to connect to DB with config: {config}")
-    
+
     for attempt in range(1, retries + 1):
         try:
             conn = psycopg2.connect(**config)
@@ -35,7 +38,7 @@ def get_connection(retries=5, delay=2):
         except psycopg2.OperationalError as e:
             logger.fatal(f"[{attempt}/{retries}] DB connection failed: {e}")
             time.sleep(delay)
-    
+
     logger.error("All retries failed — could not connect to DB.")
     raise e
 
@@ -59,14 +62,18 @@ def seed_users(users):
                 user.get("full_name", user.get("full_name", "UNKNOWN")),
                 user["email"],
                 user.get("is_verified", False),
-                user.get("password_changed_at", datetime(1970, 1, 1, tzinfo=timezone.utc)),
+                user.get(
+                    "password_changed_at", datetime(1970, 1, 1, tzinfo=timezone.utc)
+                ),
                 user.get("created_at", datetime.now(timezone.utc)),
             )
             values.append(entry)
             prepared_users.append(user["username"])
             logger.debug(f"Prepared for insert: {user['username']}")
         except Exception as e:
-            logger.exception(f"Failed to prepare user {user.get('username', '[unknown]')}: {e}")
+            logger.exception(
+                f"Failed to prepare user {user.get('username', '[unknown]')}: {e}"
+            )
 
     insert_query = """
         INSERT INTO users_user (
@@ -90,6 +97,7 @@ def seed_users(users):
     except Exception as e:
         logger.exception("Error inserting users into the database.")
 
+
 def clear_users():
     if not SEEDED_USERNAMES:
         return
@@ -97,15 +105,20 @@ def clear_users():
     with get_connection() as conn:
         with conn.cursor() as cur:
             # Delete from dependent table first
-            cur.execute("""
+            cur.execute(
+                """
                 DELETE FROM authentication_session
                 WHERE username_id IN (
                     SELECT id FROM users_user WHERE username = ANY(%s)
                 );
-            """, (SEEDED_USERNAMES,))
+            """,
+                (SEEDED_USERNAMES,),
+            )
 
             # Now delete the users
-            cur.execute("DELETE FROM users_user WHERE username = ANY(%s);", (SEEDED_USERNAMES,))
+            cur.execute(
+                "DELETE FROM users_user WHERE username = ANY(%s);", (SEEDED_USERNAMES,)
+            )
             conn.commit()
 
     SEEDED_USERNAMES.clear()

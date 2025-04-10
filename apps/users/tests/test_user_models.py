@@ -7,45 +7,47 @@ from faker import Faker
 
 faker = Faker()
 
+
 class UserModelTest(TestCase):
 
     def test_create_user(self):
         user = User.objects.create(
             username=faker.user_name(),
-            role='depositor',
+            role="depositor",
             hashed_password=faker.sha256(),
             full_name=faker.name(),
-            email=faker.unique.email()
+            email=faker.unique.email(),
         )
 
-        self.assertEqual(user.role, 'depositor')
+        self.assertEqual(user.role, "depositor")
         self.assertFalse(user.is_verified)
         self.assertIsNotNone(user.created_at)
 
     def test_str_method(self):
         user = User.objects.create(
-            username='testuser123',
-            hashed_password='pw',
-            full_name='Tester',
-            email='test@example.com'
+            username="testuser123",
+            hashed_password="pw",
+            full_name="Tester",
+            email="test@example.com",
         )
-        self.assertEqual(str(user), 'testuser123')
+        self.assertEqual(str(user), "testuser123")
 
     def test_unique_username(self):
         username = faker.user_name()
         User.objects.create(
             username=username,
-            hashed_password='pw1',
-            full_name='User One',
-            email=faker.unique.email()
+            hashed_password="pw1",
+            full_name="User One",
+            email=faker.unique.email(),
         )
         with self.assertRaises(IntegrityError):
             User.objects.create(
                 username=username,
-                hashed_password='pw2',
-                full_name='User Two',
-                email=faker.unique.email()
+                hashed_password="pw2",
+                full_name="User Two",
+                email=faker.unique.email(),
             )
+
 
 class VerifyEmailModelTest(TestCase):
     def setUp(self):
@@ -54,7 +56,7 @@ class VerifyEmailModelTest(TestCase):
             role="depositor",
             hashed_password="dummyhash",
             full_name="Test User",
-            email="test@example.com"
+            email="test@example.com",
         )
 
     def test_create_verify_email(self):
@@ -63,7 +65,7 @@ class VerifyEmailModelTest(TestCase):
             username=self.user,
             email="verify@example.com",
             secret_code="123456",
-            expired_at=expired_at
+            expired_at=expired_at,
         )
 
         self.assertEqual(ve.email, "verify@example.com")
@@ -79,9 +81,8 @@ class VerifyEmailModelTest(TestCase):
             username=self.user,
             email="verify@example.com",
             secret_code="123456",
-            expired_at=expired_at
+            expired_at=expired_at,
         )
 
         expected_str = f"Verify verify@example.com - Used: False"
         self.assertEqual(str(ve), expected_str)
-

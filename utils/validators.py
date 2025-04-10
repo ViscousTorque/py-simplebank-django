@@ -4,6 +4,7 @@ import os
 
 SUPPORTED_CURRENCIES = os.getenv("SUPPORTED_CURRENCIES", "USD")
 
+
 def validate_currency(value):
     if value not in SUPPORTED_CURRENCIES:
         raise serializers.ValidationError(f"Unsupported currency: {value}")

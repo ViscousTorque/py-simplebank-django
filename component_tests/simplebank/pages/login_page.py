@@ -4,6 +4,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import os
 
+
 class LoginPage:
     """Page Object Model for Login Page"""
 
@@ -36,16 +37,22 @@ class LoginPage:
 
         try:
             profile = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, f"//*[contains(normalize-space(text()), '{expected_name}')]"))
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        f"//*[contains(normalize-space(text()), '{expected_name}')]",
+                    )
+                )
             )
             return profile.is_displayed()
         except TimeoutException:
             print("[ERROR] Timeout waiting for profile name to appear")
             return False
 
-
     def verify_error_message(self, error_message):
         error = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, f"//div[contains(text(), '{error_message}')]"))
+            EC.presence_of_element_located(
+                (By.XPATH, f"//div[contains(text(), '{error_message}')]")
+            )
         )
         return error.is_displayed()

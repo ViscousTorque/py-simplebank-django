@@ -1,4 +1,8 @@
 {
+    "pylint.args": [
+        "--rcfile=.pylintrc"
+    ],
+    "python.defaultInterpreterPath": ".venv/bin/python",
     "python.testing.pytestArgs": [
         "component_tests"
     ],
@@ -10,5 +14,6 @@
         "./apps",
         "-p",
         "test_*.py"
-    ]
+    ],
+    "pylint.enabled": true
 }

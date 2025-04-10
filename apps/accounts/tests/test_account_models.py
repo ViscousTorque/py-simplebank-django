@@ -5,21 +5,18 @@ from apps.accounts.models import Account
 from rest_framework.exceptions import ValidationError, ErrorDetail
 from apps.accounts.serializers import AccountSerializer
 
+
 class AccountModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(
-            username='testuser123',
-            hashed_password='pw',
-            full_name='Tester',
-            email='test@example.com'
+            username="testuser123",
+            hashed_password="pw",
+            full_name="Tester",
+            email="test@example.com",
         )
 
     def test_account_creation(self):
-        account = Account.objects.create(
-            owner=self.user,
-            balance=1000,
-            currency="USD"
-        )
+        account = Account.objects.create(owner=self.user, balance=1000, currency="USD")
         self.assertEqual(account.owner, self.user)
         self.assertEqual(account.balance, 1000)
         self.assertEqual(account.currency, "USD")
@@ -33,18 +30,13 @@ class AccountModelTest(TestCase):
             Account.objects.create(owner=self.user, balance=800, currency="EUR")
 
     def test_serializer_rejects_invalid_currency(self):
-        data = {
-            "currency": "JPY",
-            "balance": 1000,
-            "owner": self.user.username
-        }
+        data = {"currency": "JPY", "balance": 1000, "owner": self.user.username}
         serializer = AccountSerializer(data=data)
-        
+
         with self.assertRaises(ValidationError) as ctx:
             serializer.is_valid(raise_exception=True)
 
         self.assertEqual(
             ctx.exception.detail["currency"],
-            [ErrorDetail(string='"JPY" is not a valid choice.', code='invalid_choice')]
+            [ErrorDetail(string='"JPY" is not a valid choice.', code="invalid_choice")],
         )
-                                                                        

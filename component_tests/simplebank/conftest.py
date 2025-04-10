@@ -2,6 +2,7 @@ import pytest
 from .db_utils import seed_users, clear_users
 from .test_factories import generate_fake_users
 
+
 @pytest.fixture(scope="session", autouse=True)
 def seed_test_users():
     known_users = [
