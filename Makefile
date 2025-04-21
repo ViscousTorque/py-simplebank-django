@@ -107,5 +107,13 @@ unittests-html:
 documentation:
 	python manage.py spectacular --file docs/openapi-schema.yml
 	npx @redocly/cli build-docs docs/openapi-schema.yml -o docs/openapi.html
+	
+local-api-doc:
+	make documentation
+	bash -c 'cd docs && python -m http.server 7000 & \
+	PID=$$!; \
+	trap "kill $$PID" EXIT; \
+	xdg-open http://localhost:7000/openapi.html; \
+	wait $$PID'
 
 .PHONY: documentation startLocalEnv network postgres createdb dropdb db_docs db_schema migrate migrations frontend redis stopdb server shell ci_comp_tests dev_comp_tests unittests unittests-html

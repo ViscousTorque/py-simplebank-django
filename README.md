@@ -116,8 +116,7 @@ make documentation
 ```
 To inspect on local machine:
 ```
-cd doc
-python -m http.server 7000
+make local-api-doc
 ```
 Browser, open : http://localhost:7000/openapi.html
 
@@ -158,3 +157,13 @@ docker run -it --rm --network bank-network postgres   psql -h postgres -U admin 
 Password for user admin: 
 ALTER ROLE
 ```
+
+# Formatting commands
+```
+black .
+find . -type f -name "*.py" \
+  -not -path "./.venv/*" \
+  -not -path "./frontend/node_modules/*" \
+  | xargs pylint
+```
+
