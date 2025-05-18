@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 from pathlib import Path
 import pytest
 from pytest_bdd import scenario, given, when, then, parsers
@@ -12,7 +13,7 @@ feature_path = Path(__file__).parent.parent / "features" / "login.feature"
 @pytest.fixture(scope="module")
 def driver():
     """Setup Chrome WebDriver."""
-    from component_tests.simplebank.utils.browser import get_driver
+    from component_tests.simplebank.utils.browser import get_driver # pylint: disable=import-outside-toplevel
 
     driver = get_driver()
     yield driver

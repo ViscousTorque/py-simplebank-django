@@ -34,8 +34,10 @@
 * Ubuntu 24.04
 * vs code
 * Python
-    * python3 -m venv venv
-    * source venv/bin/activate
+    * pyenv install 3.12.3
+    * pyenv local 3.12.3
+    * python -m venv .venv
+    * source .venv/bin/activate
     * pip install --upgrade pip
     * pip install -r requirements.txt
 * create .env file and add DJANGO_SECRET_KEY
@@ -123,8 +125,9 @@ Browser, open : http://localhost:7000/openapi.html
 # Running Tests
 
 ## In docker compose
-* docker compose up --build
-* docker compose down
+Depending on whether you need to force rebuild:
+* make dev_comp_tests
+- make dev_comp_tests NO_CACHE=1
 
 ## In vs code or using the browser
 You need 2 terminals
@@ -134,6 +137,9 @@ You need 2 terminals
 
 * Use browser and http://localhost:3000
 * Configure tests in vs code panel to pytest and select component tests, use test explorer to run the tests
+
+## To stop local env
+make stopLocalEnv
 
 # Notes:
 

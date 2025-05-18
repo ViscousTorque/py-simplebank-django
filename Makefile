@@ -67,6 +67,9 @@ startLocalEnv:
 	@sleep 2
 	@$(MAKE) redis
 
+stopLocalEnv:
+	docker stop redis pgadmin4 postgres
+
 server:
 	python manage.py runserver 5000
 
@@ -88,7 +91,7 @@ ci_tests:
 
 dev_comp_tests:
 	@set -e; \
-	COMPOSE_BAKE=true docker compose -f docker-compose.dev.yaml build && \
+	COMPOSE_BAKE=true docker compose -f docker-compose.dev.yaml build $(if $(NO_CACHE),--no-cache) && \
 	docker compose -f docker-compose.dev.yaml up -d postgres migrations pgadmin4 && \
 	docker compose -f docker-compose.dev.yaml run --rm unitests && \
 	docker compose -f docker-compose.dev.yaml run --rm component_tests; \
