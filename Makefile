@@ -99,6 +99,9 @@ dev_comp_tests:
 	docker compose -f docker-compose.dev.yaml down; \
 	exit $$EXIT_CODE
 
+open_html_report:
+	xdg-open test_reports/report.html
+
 unittests:
 	coverage run manage.py test --settings=config.settings_test
 	coverage report

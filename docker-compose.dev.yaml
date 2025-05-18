@@ -121,6 +121,8 @@ services:
       - POSTGRES_USER=simplebank
       - POSTGRES_PASSWORD=simplebankSecret
       - POSTGRES_HOST=postgres
+    volumes:
+      - ./test_reports:/reports
 
   unitests:
     build:

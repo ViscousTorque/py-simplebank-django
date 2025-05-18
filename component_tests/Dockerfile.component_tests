@@ -27,7 +27,7 @@ RUN pip install -v --no-cache-dir -r requirements.txt
 
 COPY . /app/component_tests
 
-CMD ["pytest", "component_tests", "-v", "--trace-config", "--tb=short"]
+CMD ["pytest", "component_tests", "-v", "--trace-config", "--tb=short", "--html=/reports/report.html", "--self-contained-html"]
 
 
 
