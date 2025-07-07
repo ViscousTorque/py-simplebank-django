@@ -4,13 +4,7 @@ RUN apt-get update && apt-get install -y wget gnupg ca-certificates curl \
     && curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google.gpg \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
         > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y \
-    libglib2.0-0 libnss3 libgconf-2-4 libfontconfig1 libx11-dev libxext6 \
-    libxrender1 libxrandr2 libxi6 libxtst6 libatk1.0-0 libatk-bridge2.0-0 \
-    libcups2 libxcomposite1 libxcursor1 libasound2 libpangocairo-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONDONTWRITEBYTECODE=1
