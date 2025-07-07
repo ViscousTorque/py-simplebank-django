@@ -98,7 +98,9 @@ services:
       - bank-network
     depends_on:
       - frontend
+      - backend
       - postgres
+      - selenium
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
@@ -107,7 +109,16 @@ services:
       - POSTGRES_USER=simplebank
       - POSTGRES_PASSWORD=simplebankSecret
       - POSTGRES_HOST=postgres
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
 
+  selenium:
+    image: selenium/standalone-chrome:123.0
+    container_name: selenium
+    networks:
+      - bank-network
+    ports:
+      - "4444:4444"
+  
   unitests:
     build:
       context: .
