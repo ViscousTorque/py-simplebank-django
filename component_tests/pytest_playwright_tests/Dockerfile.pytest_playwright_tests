@@ -1,0 +1,15 @@
+FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m playwright install --with-deps
+
+COPY . /app/component_tests/pytest_playwright_tests
+
+CMD ["pytest", "-v", "component_tests/pytest_playwright_tests"]

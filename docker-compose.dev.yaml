@@ -102,6 +102,26 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+  
+  pytest_playwright_tests:
+    build:
+      context: ./component_tests/pytest_playwright_tests
+      dockerfile: Dockerfile.pytest_playwright_tests
+    networks:
+      - bank-network
+    depends_on:
+      - frontend
+      - backend
+      - postgres
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - APP_BASE_URL=http://frontend
+      - POSTGRES_DB=simple_bank_py
+      - POSTGRES_USER=simplebank
+      - POSTGRES_PASSWORD=simplebankSecret
+      - POSTGRES_HOST=postgres
+
 
   pytest_selenium_tests:
     build:

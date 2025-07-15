@@ -84,7 +84,7 @@ server:
 	python manage.py runserver 5000
 
 frontend:
-	cd frontend && npm run dev
+	cd frontend && npm run dev -- --host
 
 shell:
 	python manage.py shell
@@ -94,7 +94,7 @@ COMPOSE_FILE_DEV = docker-compose.dev.yaml
 
 define run_tests
 	EXIT_CODE=0; \
-	for SERVICE in unitests pytest_selenium_tests behave_selenium_tests; do \
+	for SERVICE in unitests pytest_selenium_tests behave_selenium_tests pytest_playwright_tests; do \
 		docker compose -f $(1) run --rm $$SERVICE || EXIT_CODE=$$?; \
 	done; \
 	docker compose -f $(1) down; \
@@ -108,7 +108,7 @@ endef
 
 ci_tests:
 	@set -e; \
-	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_CI) build --no-cache backend migrations unitests behave_selenium_tests; \
+	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_CI) build --no-cache backend migrations unitests behave_selenium_tests pytest_selenium_tests pytest_playwright_tests \
 	docker compose -f $(COMPOSE_FILE_CI) up -d postgres migrations selenium; \
 	$(call run_tests,$(COMPOSE_FILE_CI))
 
