@@ -27,6 +27,16 @@ pgadmin4:
 redis:
 	docker run -d --rm --name redis -p 6379:6379 -d redis:7-alpine
 
+selenium:
+	docker run -d \
+	--name selenium \
+	--network bank-network \
+	--add-host=host.docker.internal:host-gateway \
+	-p 4444:4444 \
+	-p 7900:7900 \
+	-e VNC_NO_PASSWORD=1 \
+	selenium/standalone-chrome:123.0
+
 DOCKER_RUNNING := $(shell docker ps -q -f name=postgres)
 
 create-db:
@@ -79,25 +89,35 @@ frontend:
 shell:
 	python manage.py shell
 
+COMPOSE_FILE_CI = docker-compose.ci.yaml
+COMPOSE_FILE_DEV = docker-compose.dev.yaml
+
+define run_tests
+	EXIT_CODE=0; \
+	for SERVICE in unitests pytest_selenium_tests behave_selenium_tests; do \
+		docker compose -f $(1) run --rm $$SERVICE || EXIT_CODE=$$?; \
+	done; \
+	docker compose -f $(1) down; \
+	if [ $$EXIT_CODE -eq 0 ]; then \
+		echo "✅ All tests passed. ✅"; \
+	else \
+		echo "❌ One or more tests failed. ❌"; \
+	fi; \
+	exit $$EXIT_CODE
+endef
+
 ci_tests:
 	@set -e; \
-	COMPOSE_BAKE=true docker compose -f docker-compose.ci.yaml build --no-cache backend migrations unitests component_tests && \
-	docker compose -f docker-compose.ci.yaml up -d postgres migrations selenium && \
-	docker compose -f docker-compose.ci.yaml run --rm unitests && \
-	docker compose -f docker-compose.ci.yaml run --rm component_tests; \
-	EXIT_CODE=$$?; \
-	docker compose -f docker-compose.ci.yaml down; \
-	exit $$EXIT_CODE
+	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_CI) build --no-cache backend migrations unitests behave_selenium_tests; \
+	docker compose -f $(COMPOSE_FILE_CI) up -d postgres migrations selenium; \
+	$(call run_tests,$(COMPOSE_FILE_CI))
 
 dev_comp_tests:
 	@set -e; \
-	COMPOSE_BAKE=true docker compose -f docker-compose.dev.yaml build $(if $(NO_CACHE),--no-cache) && \
-	docker compose -f docker-compose.dev.yaml up -d postgres migrations pgadmin4 selenium && \
-	docker compose -f docker-compose.dev.yaml run --rm unitests && \
-	docker compose -f docker-compose.dev.yaml run --rm component_tests; \
-	EXIT_CODE=$$?; \
-	docker compose -f docker-compose.dev.yaml down; \
-	exit $$EXIT_CODE
+	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_DEV) build $(if $(NO_CACHE),--no-cache); \
+	docker compose -f $(COMPOSE_FILE_DEV) up -d postgres migrations pgadmin4 selenium; \
+	$(call run_tests,$(COMPOSE_FILE_DEV))
+
 
 open_html_report:
 	xdg-open test_reports/report.html

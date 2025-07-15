@@ -1,9 +1,13 @@
+import os
+import logging
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-import os
 
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class LoginPage:
     """Page Object Model for Login Page"""
@@ -13,6 +17,7 @@ class LoginPage:
         self.url = os.getenv("APP_BASE_URL", "http://localhost:3000")
 
     def open(self):
+        logger.info(f"🌍 Navigating to: {self.url}")
         self.driver.get(self.url)
 
     def enter_username(self, username):

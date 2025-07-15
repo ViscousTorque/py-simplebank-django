@@ -1,0 +1,24 @@
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    ca-certificates \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app/component_tests/behave_selenium_tests
+
+CMD ["behave", "component_tests/behave_selenium_tests/features"]
+

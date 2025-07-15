@@ -4,7 +4,7 @@
     ],
     "python.defaultInterpreterPath": ".venv/bin/python",
     "python.testing.pytestArgs": [
-        "component_tests"
+        "component_tests/pytest_selenium_tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,

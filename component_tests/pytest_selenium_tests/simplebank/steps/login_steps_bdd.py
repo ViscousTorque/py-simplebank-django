@@ -5,7 +5,7 @@ from pytest_bdd import scenario, given, when, then, parsers
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from component_tests.simplebank.pages.login_page import LoginPage
+from pytest_selenium_tests.simplebank.pages.login_page import LoginPage
 
 feature_path = Path(__file__).parent.parent / "features" / "login.feature"
 
@@ -13,7 +13,7 @@ feature_path = Path(__file__).parent.parent / "features" / "login.feature"
 @pytest.fixture(scope="module")
 def driver():
     """Setup Chrome WebDriver."""
-    from component_tests.simplebank.utils.browser import get_driver # pylint: disable=import-outside-toplevel
+    from pytest_selenium_tests.simplebank.utils.browser import get_driver # pylint: disable=import-outside-toplevel
 
     driver = get_driver()
     yield driver
