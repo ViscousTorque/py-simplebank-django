@@ -108,7 +108,7 @@ endef
 
 ci_tests:
 	@set -e; \
-	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_CI) build --no-cache backend migrations unitests behave_selenium_tests pytest_selenium_tests pytest_playwright_tests \
+	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_CI) build --no-cache backend migrations unitests behave_selenium_tests pytest_selenium_tests pytest_playwright_tests; \
 	docker compose -f $(COMPOSE_FILE_CI) up -d postgres migrations selenium; \
 	$(call run_tests,$(COMPOSE_FILE_CI))
 
