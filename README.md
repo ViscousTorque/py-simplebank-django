@@ -5,9 +5,9 @@
 
 | Goal                                 | Tools                                                      | Description                                                 |
 | ------------------------------------ | ---------------------------------------------------------- | ----------------------------------------------------------- |
-| **Mobile Web (Responsive UI)**       | ✅ Playwright, Selenium                                     | Test how your website behaves in mobile browsers/devices    |
-| **Mobile Browser Emulation**         | ✅ Playwright, ✅ Chrome DevTools                            | Emulate devices (like iPhone 12, Pixel 5) in headless tests |
-| **Native Mobile Apps (iOS/Android)** | ❌ Playwright (not supported) <br> ✅ Appium, Detox, Maestro | Test actual apps installed on a device/emulator             |
+| **Mobile Web (Responsive UI)**       | Playwright, Selenium                                     | Test how your website behaves in mobile browsers/devices    |
+| **Mobile Browser Emulation**         | Playwright, Chrome DevTools                            | Emulate devices (like iPhone 12, Pixel 5) in headless tests |
+| **Native Mobile Apps (iOS/Android)** | Playwright (not supported) <br> Appium, Detox, Maestro | Test actual apps installed on a device/emulator             |
 
 * Native mobile testing stack
 
