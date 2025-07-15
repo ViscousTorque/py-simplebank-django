@@ -1,7 +1,32 @@
 # py-simplebank-backend
 
 # TODOs
-* Tests!! so far testing with vs code postman plugin
+* Consider some mobile test frameworks next
+
+| Goal                                 | Tools                                                      | Description                                                 |
+| ------------------------------------ | ---------------------------------------------------------- | ----------------------------------------------------------- |
+| **Mobile Web (Responsive UI)**       | ✅ Playwright, Selenium                                     | Test how your website behaves in mobile browsers/devices    |
+| **Mobile Browser Emulation**         | ✅ Playwright, ✅ Chrome DevTools                            | Emulate devices (like iPhone 12, Pixel 5) in headless tests |
+| **Native Mobile Apps (iOS/Android)** | ❌ Playwright (not supported) <br> ✅ Appium, Detox, Maestro | Test actual apps installed on a device/emulator             |
+
+* Native mobile testing stack
+
+| Tool                    | Platforms     | Language               | Notes                               |
+| ----------------------- | ------------- | ---------------------- | ----------------------------------- |
+| **Appium**              | Android + iOS | JS, Python, Java, etc. | WebDriver-based, standard           |
+| **Detox**               | React Native  | JS                     | Best for unit/e2e tests             |
+| **Maestro**             | Android + iOS | YAML (low-code)        | Great for quick UI flows            |
+| **XCUITest / Espresso** | iOS / Android | Swift / Java           | Native frameworks for unit/UI tests |
+
+* Mobile Web Login Test with Appium
+
+| Platform | Browser | Appium Driver  |
+| -------- | ------- | -------------- |
+| Android  | Chrome  | `UiAutomator2` |
+| iOS      | Safari  | `XCUITest`     |
+
+
+* More Tests!! so far testing with vs code postman plugin
   * unit tests - now wired up to run the first
     * fix UpdateUser
     * add more :-)
