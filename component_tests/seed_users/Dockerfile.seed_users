@@ -1,0 +1,12 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app/component_tests/seed_users
+WORKDIR /app/component_tests/seed_users
+
+CMD ["python", "seed_users.py"]
