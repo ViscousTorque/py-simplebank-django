@@ -1,6 +1,6 @@
 import sys
-from utils.db import seed_users, get_all_users
-from utils.test_factories import generate_fake_users
+from component_tests.seed_users.utils.db import seed_users, get_all_users
+from component_tests.seed_users.utils.test_factories import generate_fake_users
 
 def main():
     known_users = [
