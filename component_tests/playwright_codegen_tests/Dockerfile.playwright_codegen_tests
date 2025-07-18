@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/playwright/python:v1.53.0-jammy
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+ENV PYTHONPATH=/app
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --upgrade pip
+RUN pip install -v --no-cache-dir -r requirements.txt
+
+COPY . /app/component_tests/playwright_codegen_tests
+
+CMD ["python", "/app/component_tests/playwright_codegen_tests/run_all_tests.py"]
+
+

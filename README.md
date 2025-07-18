@@ -1,5 +1,7 @@
 # py-simplebank-backend
 
+This repo contains a simple banking app and testing experiments to learn about frontend vue.js and automated component web app and mobile app test frameworks.
+
 # TODOs
 * Consider some mobile test frameworks next
 
