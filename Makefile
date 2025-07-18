@@ -94,7 +94,7 @@ COMPOSE_FILE_DEV = docker-compose.dev.yaml
 
 define run_tests
 	EXIT_CODE=0; \
-	for SERVICE in unitests pytest_selenium_tests behave_selenium_tests pytest_playwright_tests; do \
+	for SERVICE in unittests seed_users pytest_selenium_tests behave_selenium_tests pytest_playwright_tests playwright_codegen_tests; do \
 		docker compose -f $(1) run --rm $$SERVICE || EXIT_CODE=$$?; \
 	done; \
 	docker compose -f $(1) down; \
@@ -108,7 +108,7 @@ endef
 
 ci_tests:
 	@set -e; \
-	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_CI) build --no-cache backend migrations unitests behave_selenium_tests pytest_selenium_tests pytest_playwright_tests; \
+	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_CI) build --no-cache frontend backend migrations seed_users unittests behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests; \
 	docker compose -f $(COMPOSE_FILE_CI) up -d postgres migrations selenium; \
 	$(call run_tests,$(COMPOSE_FILE_CI))
 
@@ -116,10 +116,9 @@ dev_comp_tests:
 	@set -e; \
 	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_DEV) build $(if $(NO_CACHE),--no-cache); \
 	docker compose -f $(COMPOSE_FILE_DEV) up -d postgres migrations pgadmin4 selenium; \
-	$(call run_tests,$(COMPOSE_FILE_DEV))
+	$(call run_tests,$(COMPOSE_FILE_DEV)) 
 
-
-open_html_report:
+open_html_report:s
 	xdg-open test_reports/report.html
 
 unittests:

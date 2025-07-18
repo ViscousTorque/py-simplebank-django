@@ -73,8 +73,9 @@ services:
       sh -c "
         echo 'Waiting for Postgres...';
         while ! pg_isready -h postgres -U admin -d simple_bank_py; do sleep 1; done;
-        echo 'Running migrations...';
+        echo 'Making migrations...';
         python manage.py makemigrations;
+        echo 'Running migrations...';
         python manage.py migrate;
       "
     depends_on:
@@ -89,7 +90,22 @@ services:
       - POSTGRES_HOST=postgres
     networks:
       - bank-network
-  
+
+  seed_users:
+    build:
+      context: ./component_tests/seed_users
+      dockerfile: Dockerfile.seed_users
+    networks:
+      - bank-network
+    environment:
+      - POSTGRES_DB=simple_bank_py
+      - POSTGRES_USER=simplebank
+      - POSTGRES_PASSWORD=simplebankSecret
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - postgres
+      - migrations
+   
   pytest_playwright_tests:
     build:
       context: ./component_tests/pytest_playwright_tests
@@ -100,6 +116,7 @@ services:
       - frontend
       - backend
       - postgres
+      - seed_users
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
@@ -109,28 +126,50 @@ services:
       - POSTGRES_PASSWORD=simplebankSecret
       - POSTGRES_HOST=postgres
 
+  playwright_codegen_tests:
+    build:
+      context: ./component_tests/playwright_codegen_tests
+      dockerfile: Dockerfile.playwright_codegen_tests
+    networks:
+      - bank-network
+    depends_on:
+      - frontend
+      - backend
+      - postgres
+      - selenium
+      - seed_users
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - POSTGRES_DB=simple_bank_py
+      - POSTGRES_USER=simplebank
+      - POSTGRES_PASSWORD=simplebankSecret
+      - POSTGRES_HOST=postgres
+      - APP_BASE_URL=http://frontend
+
   pytest_selenium_tests:
-      build:
-        context: ./component_tests/pytest_selenium_tests
-        dockerfile: Dockerfile.pytest_selenium_tests
-      networks:
-        - bank-network
-      depends_on:
-        - frontend
-        - backend
-        - postgres
-        - selenium
-      environment:
-        - PYTHONUNBUFFERED=1
-        - PYTHONPATH=/app
-        - APP_BASE_URL=http://frontend
-        - POSTGRES_DB=simple_bank_py
-        - POSTGRES_USER=simplebank
-        - POSTGRES_PASSWORD=simplebankSecret
-        - POSTGRES_HOST=postgres
-        - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
-      volumes:
-        - ./test_reports:/reports
+    build:
+      context: ./component_tests/pytest_selenium_tests
+      dockerfile: Dockerfile.pytest_selenium_tests
+    networks:
+      - bank-network
+    depends_on:
+      - frontend
+      - backend
+      - postgres
+      - selenium
+      - seed_users
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - APP_BASE_URL=http://frontend
+      - POSTGRES_DB=simple_bank_py
+      - POSTGRES_USER=simplebank
+      - POSTGRES_PASSWORD=simplebankSecret
+      - POSTGRES_HOST=postgres
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+    volumes:
+      - ./test_reports:/reports
 
   behave_selenium_tests:
     build:
@@ -143,6 +182,7 @@ services:
       - backend
       - postgres
       - selenium
+      - seed_users
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
@@ -161,7 +201,7 @@ services:
     ports:
       - "4444:4444"
   
-  unitests:
+  unittests:
     build:
       context: .
       dockerfile: Dockerfile.backend

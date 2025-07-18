@@ -54,9 +54,10 @@ services:
       sh -c "
         echo 'Waiting for Postgres...';
         while ! pg_isready -h postgres -U admin -d simple_bank_py; do sleep 1; done;
-        echo 'Running migrations...';
-        python manage.py makemigrations;
-        python manage.py migrate;
+        echo 'Making migrations...' &&
+        python manage.py makemigrations --noinput &&
+        echo 'Running migrations...' &&
+        python manage.py migrate --noinput &&
       "
     depends_on:
       postgres:
@@ -102,6 +103,21 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  seed_users:
+    build:
+      context: ./component_tests/seed_users
+      dockerfile: Dockerfile.seed_users
+    networks:
+      - bank-network
+    environment:
+      - POSTGRES_DB=simple_bank_py
+      - POSTGRES_USER=simplebank
+      - POSTGRES_PASSWORD=simplebankSecret
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - postgres
+      - migrations
   
   pytest_playwright_tests:
     build:
@@ -113,6 +129,7 @@ services:
       - frontend
       - backend
       - postgres
+      - seed_users
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
@@ -122,6 +139,26 @@ services:
       - POSTGRES_PASSWORD=simplebankSecret
       - POSTGRES_HOST=postgres
 
+  playwright_codegen_tests:
+    build:
+      context: ./component_tests/playwright_codegen_tests
+      dockerfile: Dockerfile.playwright_codegen_tests
+    networks:
+      - bank-network
+    depends_on:
+      - frontend
+      - backend
+      - postgres
+      - selenium
+      - seed_users
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+      - POSTGRES_DB=simple_bank_py
+      - POSTGRES_USER=simplebank
+      - POSTGRES_PASSWORD=simplebankSecret
+      - POSTGRES_HOST=postgres
+      - APP_BASE_URL=http://frontend
 
   pytest_selenium_tests:
     build:
@@ -134,6 +171,7 @@ services:
       - backend
       - postgres
       - selenium
+      - seed_users
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
@@ -157,6 +195,7 @@ services:
       - backend
       - postgres
       - selenium
+      - seed_users
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
@@ -177,7 +216,7 @@ services:
     ports:
       - "4444:4444"
 
-  unitests:
+  unittests:
     build:
       context: .
       dockerfile: Dockerfile.backend
