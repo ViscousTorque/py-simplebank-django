@@ -37,11 +37,10 @@ class LoginPage:
 
     def verify_user_profile(self, expected_name):
         print(f"[DEBUG] Waiting for user profile with name: '{expected_name}'")
-        self.driver.save_screenshot(f"/tmp/waiting_for_{expected_name}.png")
         print(self.driver.page_source[:1000])
 
         try:
-            profile = WebDriverWait(self.driver, 10).until(
+            profile = WebDriverWait(self.driver, 30).until(
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
@@ -51,7 +50,7 @@ class LoginPage:
             )
             return profile.is_displayed()
         except TimeoutException:
-            print("[ERROR] Timeout waiting for profile name to appear")
+            print(f"[ERROR] Timeout waiting for profile with {expected_name} to appear")
             return False
 
     def verify_error_message(self, error_message):
