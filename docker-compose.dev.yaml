@@ -54,10 +54,10 @@ services:
       sh -c "
         echo 'Waiting for Postgres...';
         while ! pg_isready -h postgres -U admin -d simple_bank_py; do sleep 1; done;
-        echo 'Making migrations...' &&
-        python manage.py makemigrations --noinput &&
-        echo 'Running migrations...' &&
-        python manage.py migrate --noinput &&
+        echo 'Making migrations...';
+        python manage.py makemigrations --noinput;
+        echo 'Running migrations...';
+        python manage.py migrate --noinput
       "
     depends_on:
       postgres:

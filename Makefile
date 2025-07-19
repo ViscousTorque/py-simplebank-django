@@ -91,13 +91,20 @@ shell:
 
 COMPOSE_FILE_CI = docker-compose.ci.yaml
 COMPOSE_FILE_DEV = docker-compose.dev.yaml
+TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests
 
-define run_tests
+define run_test_sequence
+	set -e; \
+	COMPOSE="docker compose -f $(1)"; \
+	echo "Running test sequence using $$COMPOSE"; \
+	$$COMPOSE run --rm unittests; \
+	$$COMPOSE run --rm migrations; \
+	$$COMPOSE run --rm seed_users; \
 	EXIT_CODE=0; \
-	for SERVICE in pytest_selenium_tests behave_selenium_tests pytest_playwright_tests playwright_codegen_tests; do \
-		docker compose -f $(1) run --rm $$SERVICE || EXIT_CODE=$$?; \
+	for SERVICE in $(TEST_SERVICES); do \
+		$$COMPOSE run --rm $$SERVICE || EXIT_CODE=$$?; \
 	done; \
-	docker compose -f $(1) down; \
+	$$COMPOSE down; \
 	if [ $$EXIT_CODE -eq 0 ]; then \
 		echo "✅ All tests passed. ✅"; \
 	else \
@@ -106,23 +113,76 @@ define run_tests
 	exit $$EXIT_CODE
 endef
 
-ci_tests:
-	@set -e; \
-	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_CI) build --no-cache frontend backend migrations seed_users unittests behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests; \
-	docker compose -f $(COMPOSE_FILE_CI) up -d --remove-orphans postgres selenium; \
-	docker compose -f $(COMPOSE_FILE_CI) run --rm unittests; \
-	docker compose -f $(COMPOSE_FILE_CI) run --rm migrations; \
-	docker compose -f $(COMPOSE_FILE_CI) run --rm seed_users; \
-	$(call run_tests,$(COMPOSE_FILE_CI))
+define run_comp_tests
+	set -e; \
+	COMPOSE_FILE=$(1); \
+	INFRA_SERVICES="$(2)"; \
+	COMPOSE="docker compose -f $$COMPOSE_FILE"; \
+	echo "Building containers for $$COMPOSE_FILE..."; \
+	COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache); \
+	echo "Starting infrastructure: $$INFRA_SERVICES"; \
+	$$COMPOSE up -d --remove-orphans $$INFRA_SERVICES; \
+	$(call run_test_sequence,$(1))
+endef
+
+define run_comp_parallel_tests
+	set -e; \
+	COMPOSE_FILE=$(1); \
+	INFRA_SERVICES="$(2)"; \
+	COMPOSE="docker compose -f $$COMPOSE_FILE"; \
+	echo "Building containers for $$COMPOSE_FILE..."; \
+	COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache); \
+	echo "Starting infrastructure: $$INFRA_SERVICES"; \
+	$$COMPOSE up -d --remove-orphans $$INFRA_SERVICES; \
+	echo "Running setup services..."; \
+	$$COMPOSE run --rm unittests; \
+	$$COMPOSE run --rm --no-deps migrations; \
+	$$COMPOSE run --rm --no-deps seed_users; \
+	$(call run_parallel_tests,$(1))
+endef
+
+define run_parallel_tests
+	set -e; \
+	SERVICES="behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests"; \
+	EXIT_CODE=0; \
+	PIDS=""; \
+	for SERVICE in $$SERVICES; do \
+		echo "🚀 Running $$SERVICE..."; \
+		docker compose -f $(1) up --no-deps --exit-code-from $$SERVICE $$SERVICE & \
+		PIDS="$$PIDS $$!"; \
+	done; \
+	for PID in $$PIDS; do \
+		wait $$PID || EXIT_CODE=$$?; \
+	done; \
+	echo "Logs from test containers:"; \
+	docker compose -f $(1) logs $$SERVICES || true; \
+	docker compose -f $(1) down --remove-orphans; \
+	if [ $$EXIT_CODE -eq 0 ]; then \
+		echo "✅ All component tests passed. ✅"; \
+	else \
+		echo "❌ One or more component tests failed. ❌"; \
+	fi; \
+	exit $$EXIT_CODE
+endef
 
 dev_comp_tests:
-	@set -e; \
-	COMPOSE_BAKE=true docker compose -f $(COMPOSE_FILE_DEV) build $(if $(NO_CACHE),--no-cache); \
-	docker compose -f $(COMPOSE_FILE_DEV) up -d --remove-orphans postgres pgadmin4 selenium; \
-	docker compose -f $(COMPOSE_FILE_CI) run --rm unittests; \
-	docker compose -f $(COMPOSE_FILE_CI) run --rm migrations; \
-	docker compose -f $(COMPOSE_FILE_CI) run --rm seed_users; \
-	$(call run_tests,$(COMPOSE_FILE_DEV)) 
+	$(call run_comp_tests,$(COMPOSE_FILE_DEV),postgres frontend pgadmin4 selenium)
+
+ci_tests:
+	@NO_CACHE=1 $(MAKE) _ci_tests_internal
+
+_ci_tests_internal:
+	$(call run_comp_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
+
+dev_comp_parallel_tests:
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)
+
+ci_parallel_tests:
+	@NO_CACHE=1 $(MAKE) _ci_parallel_tests_internal
+
+_ci_parallel_tests_internal:
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
+
 
 open_html_report:s
 	xdg-open test_reports/report.html

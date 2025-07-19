@@ -20,4 +20,4 @@ jobs:
         make --version
 
     - name: Run component and unit tests
-      run: make ci_tests
+      run: make ci_parallel_tests
