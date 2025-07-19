@@ -89,10 +89,6 @@ frontend:
 shell:
 	python manage.py shell
 
-COMPOSE_FILE_CI = docker-compose.ci.yaml
-COMPOSE_FILE_DEV = docker-compose.dev.yaml
-TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests
-
 define run_test_sequence
 	set -e; \
 	COMPOSE="docker compose -f $(1)"; \
@@ -143,19 +139,18 @@ endef
 
 define run_parallel_tests
 	set -e; \
-	SERVICES="behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests"; \
 	EXIT_CODE=0; \
 	PIDS=""; \
-	for SERVICE in $$SERVICES; do \
+	for TEST_SERVICE in $(TEST_SERVICES); do \
 		echo "🚀 Running $$SERVICE..."; \
-		docker compose -f $(1) up --no-deps --exit-code-from $$SERVICE $$SERVICE & \
+		docker compose -f $(1) up --no-deps --exit-code-from $$TEST_SERVICE $$TEST_SERVICE & \
 		PIDS="$$PIDS $$!"; \
 	done; \
 	for PID in $$PIDS; do \
 		wait $$PID || EXIT_CODE=$$?; \
 	done; \
 	echo "Logs from test containers:"; \
-	docker compose -f $(1) logs $$SERVICES || true; \
+	docker compose -f $(1) logs $(TEST_SERVICES) || true; \
 	docker compose -f $(1) down --remove-orphans; \
 	if [ $$EXIT_CODE -eq 0 ]; then \
 		echo "✅ All component tests passed. ✅"; \
@@ -165,8 +160,12 @@ define run_parallel_tests
 	exit $$EXIT_CODE
 endef
 
+COMPOSE_FILE_CI = docker-compose.ci.yaml
+COMPOSE_FILE_DEV = docker-compose.dev.yaml
+TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests
+
 dev_comp_tests:
-	$(call run_comp_tests,$(COMPOSE_FILE_DEV),postgres frontend pgadmin4 selenium)
+	$(call run_comp_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)
 
 ci_tests:
 	@NO_CACHE=1 $(MAKE) _ci_tests_internal
