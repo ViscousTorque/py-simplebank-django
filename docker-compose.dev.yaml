@@ -134,10 +134,6 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - APP_BASE_URL=http://frontend
-      - POSTGRES_DB=simple_bank_py
-      - POSTGRES_USER=simplebank
-      - POSTGRES_PASSWORD=simplebankSecret
-      - POSTGRES_HOST=postgres
 
   playwright_codegen_tests:
     build:
@@ -154,10 +150,6 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
-      - POSTGRES_DB=simple_bank_py
-      - POSTGRES_USER=simplebank
-      - POSTGRES_PASSWORD=simplebankSecret
-      - POSTGRES_HOST=postgres
       - APP_BASE_URL=http://frontend
 
   pytest_selenium_tests:
@@ -176,10 +168,6 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - APP_BASE_URL=http://frontend
-      - POSTGRES_DB=simple_bank_py
-      - POSTGRES_USER=simplebank
-      - POSTGRES_PASSWORD=simplebankSecret
-      - POSTGRES_HOST=postgres
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
     volumes:
       - ./test_reports:/reports
@@ -200,10 +188,6 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - APP_BASE_URL=http://frontend
-      - POSTGRES_DB=simple_bank_py
-      - POSTGRES_USER=simplebank
-      - POSTGRES_PASSWORD=simplebankSecret
-      - POSTGRES_HOST=postgres
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
 
   selenium:
