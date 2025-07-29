@@ -68,11 +68,11 @@ COPY --from=builder /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 COPY --from=builder /root/.appium /root/.appium
 
-
 # Copy project files and entrypoint
 WORKDIR /app
-COPY . ./component_tests/android_emulator
+COPY . /app/component_tests/android_emulator
 RUN chmod +x /app/component_tests/android_emulator/entrypoint.sh
+RUN chmod +x /app/component_tests/android_emulator/wait-for-emulator.sh
 
 EXPOSE 4723
 ENTRYPOINT ["./component_tests/android_emulator/entrypoint.sh"]
