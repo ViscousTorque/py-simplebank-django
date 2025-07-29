@@ -188,7 +188,49 @@ services:
       - bank-network
     ports:
       - "4444:4444"
-      
+    
+  android-emulator:
+    build:
+      context: ./component_tests/android_emulator
+      dockerfile: Dockerfile.android_emulator_new
+    container_name: android-emulator
+    privileged: true  # Required for KVM, even if using software rendering
+    ports:
+      - "4723:4723"
+    environment:
+      - AVD_NAME=ci_emulator
+      - EMULATOR_GPU=swiftshader_indirect
+      - APPIUM_HOST=android-emulator
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://android-emulator:4723/status | grep -q '\"ready\":true'"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  pytest_appium_android:
+    build:
+      context: ./component_tests/pytest_appium_android_tests
+      dockerfile: Dockerfile.pytest_appium_android
+    depends_on:
+      android-emulator:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_started
+      selenium:
+        condition: service_started
+      seed_users:
+        condition: service_started
+    networks:
+      - bank-network
+    environment:
+      - APPIUM_HOST=android-emulator
+
   postman_tests:
     build:
       context: ./component_tests/postman_tests
@@ -202,7 +244,6 @@ services:
       newman run "3 newman py-simplebank.postman_collection.json"
       --env-var base_url=http://backend:5000
 
-  
   unittests:
     build:
       context: .

@@ -29,7 +29,6 @@ redis:
 
 selenium:
 	docker run -d \
-	--name selenium \
 	--network bank-network \
 	--add-host=host.docker.internal:host-gateway \
 	-p 4444:4444 \
@@ -78,7 +77,7 @@ startLocalEnv:
 	@$(MAKE) redis
 
 stopLocalEnv:
-	docker stop redis pgadmin4 postgres
+	docker stop redis pgadmin4 postgres selenium android
 
 server:
 	python manage.py runserver 5000
@@ -162,19 +161,19 @@ endef
 
 COMPOSE_FILE_CI = docker-compose.ci.yaml
 COMPOSE_FILE_DEV = docker-compose.dev.yaml
-TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests postman_tests
 
+TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests postman_tests pytest_appium_android
 dev_comp_tests:
-	$(call run_comp_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)
+	$(call run_comp_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium android-emulator)
 
 ci_tests:
 	@NO_CACHE=1 $(MAKE) _ci_tests_internal
 
 _ci_tests_internal:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium android-emulator)
 
 dev_comp_parallel_tests:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium android-emulator)
 
 ci_parallel_tests:
 	@NO_CACHE=1 $(MAKE) _ci_parallel_tests_internal

@@ -1,0 +1,58 @@
+FROM ubuntu:24.04
+
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:${PATH}"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+  curl unzip openjdk-17-jdk adb qemu-kvm \
+  libgl1 libpulse0 libqt5widgets5 libnss3 \
+  libxcomposite1 libxcursor1 libxdamage1 \
+  libxi6 libxtst6 libxrandr2 libxss1 libasound2t64 \
+  nodejs npm && \
+  rm -rf /var/lib/apt/lists/*
+
+# Install Appium
+RUN npm install -g appium
+
+# Download and set up Android command-line tools
+RUN mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools" && \
+  curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o cmd.zip && \
+  unzip cmd.zip -d "$ANDROID_SDK_ROOT/cmdline-tools/tmp" && \
+  mv "$ANDROID_SDK_ROOT/cmdline-tools/tmp/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest" && \
+  rm -rf cmd.zip "$ANDROID_SDK_ROOT/cmdline-tools/tmp"
+
+# Accept SDK licenses
+RUN yes | sdkmanager --licenses
+
+# Install emulator and image
+RUN sdkmanager --verbose \
+  "platform-tools" \
+  "emulator" \
+  "platforms;android-33" \
+  "system-images;android-33;google_apis;x86_64"
+
+# Download Chromedriver matching the emulator's Chrome version
+RUN mkdir -p /opt/chromedrivers && \
+    curl -sSL https://chromedriver.storage.googleapis.com/109.0.5414.74/chromedriver_linux64.zip -o /tmp/chromedriver.zip && \
+    unzip /tmp/chromedriver.zip -d /opt/chromedrivers/ && \
+    rm /tmp/chromedriver.zip && \
+    chmod +x /opt/chromedrivers/chromedriver
+
+# Create emulator
+RUN echo "no" | avdmanager create avd -n ci_emulator -k "system-images;android-33;google_apis;x86_64" --device "pixel"
+
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g appium && \
+    appium driver install uiautomator2
+
+# Start emulator and Appium
+EXPOSE 4723
+
+WORKDIR /app
+
+COPY . /app/component_tests/android_emulator
+RUN chmod +x component_tests/android_emulator/entrypoint.sh
+ENTRYPOINT ["./component_tests/android_emulator/entrypoint.sh"]
