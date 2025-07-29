@@ -178,16 +178,16 @@ ci_tests:
 	@NO_CACHE=1 $(MAKE) _ci_tests_internal
 
 _ci_tests_internal:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium android-emulator)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
 
 dev_comp_parallel_tests:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium android-emulator)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)
 
 ci_parallel_tests:
 	@NO_CACHE=1 $(MAKE) _ci_parallel_tests_internal
 
 _ci_parallel_tests_internal:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium android-emulator)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
 
 
 open_html_report:s
