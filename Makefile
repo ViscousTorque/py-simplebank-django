@@ -131,8 +131,8 @@ define run_comp_parallel_tests
 	$$COMPOSE up -d android-emulator; \
 	echo "Building other containers..."; \
 	FILTERED_INFRA_SERVICES="$(filter-out android-emulator,$(2))"; \
-	COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache) $$FILTERED_INFRA_SERVICES $$TEST_SERVICES; \
-	echo "Starting remaining infrastructure..."; \
+	COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache) $$FILTERED_INFRA_SERVICES $(TEST_SERVICES); \
+	echo "Starting infrastructure..."; \
 	$$COMPOSE up -d --remove-orphans $$FILTERED_INFRA_SERVICES; \
  	echo "Running setup services (unit tests, migrations, seed)..."; \
 	$$COMPOSE run --rm unittests; \
