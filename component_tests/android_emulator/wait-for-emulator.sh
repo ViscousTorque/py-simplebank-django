@@ -3,7 +3,7 @@ set -e
 
 command -v adb || { echo "❌ adb not found"; exit 1; }
 
-MAX_RETRIES=60
+MAX_RETRIES=120
 SLEEP_INTERVAL=2
 
 echo "Waiting for emulator to be detected by adb..."

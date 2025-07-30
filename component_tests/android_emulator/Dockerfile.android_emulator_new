@@ -1,78 +1,85 @@
 # ----------------------------------
-# Stage 1: Build tools, SDKs, and AVD
+# Stage 1: Build tools, SDKs, Appium
 # ----------------------------------
-FROM ubuntu:24.04 AS builder
+FROM debian:bookworm-slim AS builder
 
+ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:${PATH}"
 
-RUN apt-get update && apt-get install -y \
+# Install base packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
   curl unzip openjdk-17-jdk adb qemu-kvm \
   libgl1 libpulse0 libqt5widgets5 libnss3 \
   libxcomposite1 libxcursor1 libxdamage1 \
-  libxi6 libxtst6 libxrandr2 libxss1 libasound2t64 \
+  libxi6 libxtst6 libxrandr2 libxss1 libasound2 \
   nodejs npm && \
-  rm -rf /var/lib/apt/lists/*
+  apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install Appium and drivers
-RUN npm install -g appium && appium driver install uiautomator2
+# Install Appium and UiAutomator2 driver
+ENV APPIUM_HOME=/root/.appium
+RUN npm install -g appium && \
+    appium driver install uiautomator2 && \
+    npm cache clean --force
+RUN rm -rf /tmp/* /root/.npm /root/.cache
 
-# Install SDK tools
+
+# Install Android command line tools
 RUN mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools" && \
   curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o cmd.zip && \
   unzip cmd.zip -d "$ANDROID_SDK_ROOT/cmdline-tools/tmp" && \
   mv "$ANDROID_SDK_ROOT/cmdline-tools/tmp/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest" && \
   rm -rf cmd.zip "$ANDROID_SDK_ROOT/cmdline-tools/tmp"
 
+# Install emulator only (AVD deferred to runtime)
 RUN yes | sdkmanager --licenses && \
   sdkmanager --verbose \
     "platform-tools" \
-    "emulator" \
-    "platforms;android-33" \
-    "system-images;android-33;google_apis;x86_64"
+      "emulator"
 
-# Create AVD
-RUN echo "no" | avdmanager create avd -n ci_emulator -k "system-images;android-33;google_apis;x86_64" --device "pixel"
-
-# Install matching Chromedriver
+# Download specific Chromedriver
 RUN mkdir -p /opt/chromedrivers && \
     curl -sSL https://chromedriver.storage.googleapis.com/109.0.5414.74/chromedriver_linux64.zip -o /tmp/chromedriver.zip && \
     unzip /tmp/chromedriver.zip -d /opt/chromedrivers/ && \
-    rm /tmp/chromedriver.zip && \
-    chmod +x /opt/chromedrivers/chromedriver
+    chmod +x /opt/chromedrivers/chromedriver && \
+    rm /tmp/chromedriver.zip
+
+# Clean builder
+RUN rm -rf /root/.android /tmp/* /var/tmp/* /opt/android-sdk/licenses
 
 # ----------------------------------
-# Stage 2: Final lighter weight image
+# Stage 2: Final Runtime Image
 # ----------------------------------
-FROM ubuntu:24.04
+FROM debian:bookworm-slim
 
+ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:${PATH}"
+ENV NODE_PATH=/usr/local/lib/node_modules
+ENV APPIUM_HOME=/root/.appium
 
-# Only install runtime deps
-RUN apt-get update && apt-get install -y \
+# Runtime-only dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
   openjdk-17-jre-headless curl qemu-kvm \
   libgl1 libpulse0 libqt5widgets5 libnss3 \
   libxcomposite1 libxcursor1 libxdamage1 \
-  libxi6 libxtst6 libxrandr2 libxss1 libasound2t64 \
-  nodejs npm unzip && \
-  rm -rf /var/lib/apt/lists/*
+  libxi6 libxtst6 libxrandr2 libxss1 libasound2 \
+  nodejs unzip && \
+  apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Copy required parts from builder
+# Copy only necessary components
 COPY --from=builder /opt/android-sdk /opt/android-sdk
-COPY --from=builder /root/.android /root/.android
-COPY --from=builder /opt/chromedrivers /opt/chromedrivers
+COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
+COPY --from=builder /opt/chromedrivers /opt/chromedrivers
 COPY --from=builder /root/.appium /root/.appium
 
-# Copy project files and entrypoint
+# Copy your project
 WORKDIR /app
 COPY . /app/component_tests/android_emulator
-RUN chmod +x /app/component_tests/android_emulator/entrypoint.sh
-RUN chmod +x /app/component_tests/android_emulator/wait-for-emulator.sh
+RUN chmod +x /app/component_tests/android_emulator/*.sh
 
 EXPOSE 4723
 ENTRYPOINT ["./component_tests/android_emulator/entrypoint.sh"]

@@ -129,17 +129,17 @@ define run_comp_parallel_tests
 	$$COMPOSE build $(if $(NO_CACHE),--no-cache) android-emulator & \
 	ANDROID_BUILD_PID=$$!; \
 	echo "Building other containers..."; \
-	COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache); \
+    COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache) $(filter-out android-emulator,$(INFRA_SERVICES)); \
 	echo "Starting remaining infrastructure (except emulator)..."; \
 	$$COMPOSE up -d --remove-orphans $$(echo $$INFRA_SERVICES | sed 's/android-emulator//'); \
-	echo "Running setup services (unit tests, migrations, seed)..."; \
+	echo "Waiting for android-emulator build/start to finish..."; \
+	wait $$ANDROID_BUILD_PID; \
+	$$COMPOSE up -d android-emulator; \
+ 	echo "Running setup services (unit tests, migrations, seed)..."; \
 	$$COMPOSE run --rm unittests; \
 	$$COMPOSE run --rm --no-deps migrations; \
 	$$COMPOSE run --rm --no-deps seed_users; \
-	echo "Waiting for android-emulator build/start to finish..."; \
-	wait $$ANDROID_BUILD_PID; \
 	echo "Docker container android-emulator build complete. Waiting for emulator to boot..."; \
-	$$COMPOSE up -d android-emulator; \
  	$$COMPOSE exec -T android-emulator bash ./component_tests/android_emulator/wait-for-emulator.sh; \
 	$(call run_parallel_tests,$(1))
 endef
@@ -156,8 +156,6 @@ define run_parallel_tests
 	for PID in $$PIDS; do \
 		wait $$PID || EXIT_CODE=$$?; \
 	done; \
-	echo "Logs from test containers:"; \
-	docker compose -f $(1) logs $(TEST_SERVICES) || true; \
 	docker compose -f $(1) down --remove-orphans; \
 	if [ $$EXIT_CODE -eq 0 ]; then \
 		echo "✅ All component tests passed. ✅"; \
