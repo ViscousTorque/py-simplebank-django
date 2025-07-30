@@ -125,21 +125,20 @@ define run_comp_parallel_tests
 	COMPOSE_FILE=$(1); \
 	INFRA_SERVICES="$(2)"; \
 	COMPOSE="docker compose -f $$COMPOSE_FILE"; \
-	echo "Starting android-emulator build + startup in background..."; \
-	$$COMPOSE build $(if $(NO_CACHE),--no-cache) android-emulator & \
-	ANDROID_BUILD_PID=$$!; \
-	echo "Building other containers..."; \
-    COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache) $(filter-out android-emulator,$(INFRA_SERVICES)); \
-	echo "Starting remaining infrastructure (except emulator)..."; \
-	$$COMPOSE up -d --remove-orphans $$(echo $$INFRA_SERVICES | sed 's/android-emulator//'); \
-	echo "Waiting for android-emulator build/start to finish..."; \
-	wait $$ANDROID_BUILD_PID; \
+	echo "Starting android-emulator build ..."; \
+	$$COMPOSE build $(if $(NO_CACHE),--no-cache) android-emulator; \
+	echo "Docker container android-emulator build complete. Starting emulator..."; \
 	$$COMPOSE up -d android-emulator; \
+	echo "Building other containers..."; \
+	FILTERED_INFRA_SERVICES="$(filter-out android-emulator,$(2))"; \
+	COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache) $$FILTERED_INFRA_SERVICES; \
+	echo "Starting remaining infrastructure..."; \
+	$$COMPOSE up -d --remove-orphans $$FILTERED_INFRA_SERVICES; \
  	echo "Running setup services (unit tests, migrations, seed)..."; \
 	$$COMPOSE run --rm unittests; \
 	$$COMPOSE run --rm --no-deps migrations; \
 	$$COMPOSE run --rm --no-deps seed_users; \
-	echo "Docker container android-emulator build complete. Waiting for emulator to boot..."; \
+	echo "Waiting for emulator to boot..."; \
  	$$COMPOSE exec -T android-emulator bash ./component_tests/android_emulator/wait-for-emulator.sh; \
 	$(call run_parallel_tests,$(1))
 endef
@@ -176,7 +175,7 @@ ci_tests:
 	@NO_CACHE=1 $(MAKE) _ci_tests_internal
 
 _ci_tests_internal:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend backend selenium)
 
 dev_comp_parallel_tests:
 	$(call run_comp_parallel_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)
@@ -185,7 +184,7 @@ ci_parallel_tests:
 	@NO_CACHE=1 $(MAKE) _ci_parallel_tests_internal
 
 _ci_parallel_tests_internal:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend backend selenium)
 
 
 open_html_report:s
