@@ -69,8 +69,20 @@ This repo contains a simple banking app and testing experiments to learn about f
     * pip install -r requirements.txt
 * create .env file and add DJANGO_SECRET_KEY
 * make startLocalEnv
-* Login in to pgadmin4 (http://localhost:8000) Django doesnt add the user!
-    * Add new user: CREATE USER simplebank WITH PASSWORD 'simplebankSecret';
+* Login in to pgadmin4 (http://localhost:8000) Django doesnt add the user and priviledges:
+```
+CREATE USER simplebank WITH PASSWORD 'simplebankSecret';
+ALTER ROLE simplebank CREATEDB;
+
+GRANT ALL PRIVILEGES ON DATABASE simple_bank_py TO simplebank;
+
+GRANT USAGE ON SCHEMA public TO simplebank;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO simplebank;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO simplebank;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO simplebank;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO simplebank;
+```
 * make create-db
 * make migrations
 ```
@@ -164,6 +176,18 @@ You need 2 terminals
 
 * Use browser and http://localhost:3000
 * Configure tests in vs code panel to pytest and select component tests, use test explorer to run the tests
+
+## Manually checking the postman collection is working in local env
+cd to component_tests/postman_tests
+```
+docker run --rm \
+  --network host \
+  -v "$PWD:/app" \
+  -w /app \
+  newman-runner \
+  newman run "3 newman py-simplebank.postman_collection.json" \
+    --env-var base_url=http://localhost:5000
+```
 
 ## To stop local env
 make stopLocalEnv

@@ -200,6 +200,19 @@ services:
     ports:
       - "4444:4444"
 
+  postman_tests:
+    build:
+      context: ./component_tests/postman_tests
+      dockerfile: Dockerfile.newman
+    networks:
+      - bank-network
+    depends_on:
+      - backend
+      - seed_users
+    command: >
+      newman run "3 newman py-simplebank.postman_collection.json"
+      --env-var base_url=http://backend:5000
+
   unittests:
     build:
       context: .
