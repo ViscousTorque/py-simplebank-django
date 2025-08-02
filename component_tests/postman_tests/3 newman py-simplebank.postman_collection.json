@@ -1,0 +1,304 @@
+{
+	"info": {
+		"name": "3 newman py-simplebank",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "/v1/create_user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Parse response JSON",
+							"let response = pm.response.json();",
+							"",
+							"// Check response fields",
+							"pm.test(\"Response has correct user data\", function () {",
+							"    pm.expect(response).to.have.property(\"username\", \"torqueviscous\");",
+							"    pm.expect(response).to.have.property(\"full_name\", \"Torque Viscous\");",
+							"    pm.expect(response).to.have.property(\"email\", \"torqueviscous@example.com\");",
+							"",
+							"    pm.expect(response).to.have.property(\"password_changed_at\").that.is.a(\"string\");",
+							"    pm.expect(response).to.have.property(\"created_at\").that.is.a(\"string\");",
+							"",
+							"    const isoDateRegex = /\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d+([+-]\\d{2}:\\d{2}|Z)/;",
+							"    pm.expect(response.password_changed_at).to.match(isoDateRegex);",
+							"    pm.expect(response.created_at).to.match(isoDateRegex);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"torqueviscous\",\n    \"full_name\": \"Torque Viscous\",\n    \"email\" : \"torqueviscous@example.com\",\n    \"password\" : \"torqueSecret\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/create_user",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"create_user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/login_user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"let jsonData = pm.response.json();",
+							"",
+							"// Check presence of top-level fields",
+							"pm.test(\"Response has all expected top-level fields\", function () {",
+							"    pm.expect(jsonData).to.have.property(\"session_id\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"access_token\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"access_token_expires_at\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"refresh_token\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"refresh_token_expires_at\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"user\").that.is.an(\"object\");",
+							"});",
+							"",
+							"// Check user object",
+							"pm.test(\"User object has correct structure\", function () {",
+							"    let user = jsonData.user;",
+							"    pm.expect(user).to.have.property(\"username\", \"torqueviscous\");",
+							"    pm.expect(user).to.have.property(\"full_name\", \"Torque Viscous\");",
+							"    pm.expect(user).to.have.property(\"email\", \"torqueviscous@example.com\");",
+							"",
+							"    // Optional: check date fields in ISO format",
+							"    const isoDateRegex = /\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)/;",
+							"    pm.expect(user).to.have.property(\"password_changed_at\").that.matches(isoDateRegex);",
+							"    pm.expect(user).to.have.property(\"created_at\").that.matches(isoDateRegex);",
+							"    pm.expect(jsonData.access_token_expires_at).to.match(isoDateRegex);",
+							"    pm.expect(jsonData.refresh_token_expires_at).to.match(isoDateRegex);",
+							"});",
+							"",
+							"var jsonResponseBody = JSON.parse(responseBody)",
+							"pm.collectionVariables.set(\"access_token\", jsonResponseBody.access_token);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"torqueviscous\",\n    \"password\" : \"torqueSecret\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/login_user",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"login_user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/update_user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Parse response body",
+							"let jsonData = pm.response.json();",
+							"",
+							"// Validate expected fields and values",
+							"pm.test(\"Response has correct user info\", function () {",
+							"    pm.expect(jsonData).to.have.property(\"username\", \"torqueviscous\");",
+							"    pm.expect(jsonData).to.have.property(\"full_name\", \"Torque Astrophysics Viscous\");",
+							"    pm.expect(jsonData).to.have.property(\"email\", \"torqueAstrophysicsviscous@example.com\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer v2.local.kLqQMywyZzYHNpLLh_Wl_iVnSrbMxXAIDwh1-svvClTfp-DfdVuoL_QXcRjoynLWD75lMfaTBi6XPoEGpq5ziS-yuj5uqIZJ5CBkM22A8iIkcXqhOMQZsUYcMfzzDInVnZDd7AYhmKx4QEuqaNBZNU3Hs4mmjJIMC4as9eYUQhch7R8iFrDJoDVR7drgaHxdNYM3E8UnW7pT8MlsCp90jooCDL4rtrBXvJY8KxX2N0ItCaOxnzunLRr3Rzl68U4E87glrezb2w7IP-yET93kMbgeX__nDA.bnVsbA",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"torqueviscous\",\n    \"full_name\": \"Torque Astrophysics Viscous\",\n    \"email\": \"torqueAstrophysicsviscous@example.com\",\n    \"password\": \"torqueAstroSecret\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/update_user",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"update_user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/v1/create_account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check status code is 200",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"let jsonData = pm.response.json();",
+							"",
+							"// Validate response structure and values",
+							"pm.test(\"Response contains correct account details\", function () {",
+							"    pm.expect(jsonData).to.have.property(\"id\", 1);",
+							"    pm.expect(jsonData).to.have.property(\"owner\", \"torqueviscous\");",
+							"    pm.expect(jsonData).to.have.property(\"balance\", 0);",
+							"    pm.expect(jsonData).to.have.property(\"currency\", \"USD\");",
+							"",
+							"    // Check created_at is a valid ISO 8601 string",
+							"    const isoDateRegex = /\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)/;",
+							"    pm.expect(jsonData).to.have.property(\"created_at\").that.matches(isoDateRegex);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"owner\": \"torqueviscous\",\n    \"currency\": \"USD\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/v1/create_account",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"create_account"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "Bearer{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://backend:5000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

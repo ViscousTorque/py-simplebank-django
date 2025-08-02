@@ -1,0 +1,6 @@
+FROM node:20-alpine
+WORKDIR /app
+RUN npm install -g newman
+COPY . .
+
+CMD ["newman", "run", "3 newman py-simplebank.postman_collection.json"]
