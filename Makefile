@@ -29,7 +29,6 @@ redis:
 
 selenium:
 	docker run -d \
-	--name selenium \
 	--network bank-network \
 	--add-host=host.docker.internal:host-gateway \
 	-p 4444:4444 \
@@ -78,7 +77,7 @@ startLocalEnv:
 	@$(MAKE) redis
 
 stopLocalEnv:
-	docker stop redis pgadmin4 postgres
+	docker stop redis pgadmin4 postgres selenium android
 
 server:
 	python manage.py runserver 5000
@@ -126,14 +125,21 @@ define run_comp_parallel_tests
 	COMPOSE_FILE=$(1); \
 	INFRA_SERVICES="$(2)"; \
 	COMPOSE="docker compose -f $$COMPOSE_FILE"; \
-	echo "Building containers for $$COMPOSE_FILE..."; \
-	COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache); \
-	echo "Starting infrastructure: $$INFRA_SERVICES"; \
-	$$COMPOSE up -d --remove-orphans $$INFRA_SERVICES; \
-	echo "Running setup services..."; \
+	echo "Starting android-emulator build ..."; \
+	$$COMPOSE build $(if $(NO_CACHE),--no-cache) android-emulator; \
+	echo "Docker container android-emulator build complete. Starting emulator..."; \
+	$$COMPOSE up -d android-emulator; \
+	echo "Building other containers..."; \
+	FILTERED_INFRA_SERVICES="$(filter-out android-emulator,$(2))"; \
+	COMPOSE_BAKE=true $$COMPOSE build $(if $(NO_CACHE),--no-cache) $$FILTERED_INFRA_SERVICES $(TEST_SERVICES); \
+	echo "Starting infrastructure..."; \
+	$$COMPOSE up -d --remove-orphans $$FILTERED_INFRA_SERVICES; \
+ 	echo "Running setup services (unit tests, migrations, seed)..."; \
 	$$COMPOSE run --rm unittests; \
 	$$COMPOSE run --rm --no-deps migrations; \
 	$$COMPOSE run --rm --no-deps seed_users; \
+	echo "Waiting for emulator to boot..."; \
+ 	$$COMPOSE exec -T android-emulator bash ./component_tests/android_emulator/wait-for-emulator.sh; \
 	$(call run_parallel_tests,$(1))
 endef
 
@@ -142,15 +148,13 @@ define run_parallel_tests
 	EXIT_CODE=0; \
 	PIDS=""; \
 	for TEST_SERVICE in $(TEST_SERVICES); do \
-		echo "🚀 Running $$SERVICE..."; \
+		echo "Running $$TEST_SERVICE..."; \
 		docker compose -f $(1) up --no-deps --exit-code-from $$TEST_SERVICE $$TEST_SERVICE & \
 		PIDS="$$PIDS $$!"; \
 	done; \
 	for PID in $$PIDS; do \
 		wait $$PID || EXIT_CODE=$$?; \
 	done; \
-	echo "Logs from test containers:"; \
-	docker compose -f $(1) logs $(TEST_SERVICES) || true; \
 	docker compose -f $(1) down --remove-orphans; \
 	if [ $$EXIT_CODE -eq 0 ]; then \
 		echo "✅ All component tests passed. ✅"; \
@@ -162,25 +166,25 @@ endef
 
 COMPOSE_FILE_CI = docker-compose.ci.yaml
 COMPOSE_FILE_DEV = docker-compose.dev.yaml
-TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests postman_tests
 
+TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests postman_tests pytest_appium_android
 dev_comp_tests:
-	$(call run_comp_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)
+	$(call run_comp_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium android-emulator migrations seed_users)
 
 ci_tests:
 	@NO_CACHE=1 $(MAKE) _ci_tests_internal
 
 _ci_tests_internal:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend backend selenium migrations seed_users)
 
 dev_comp_parallel_tests:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium migrations seed_users)
 
 ci_parallel_tests:
 	@NO_CACHE=1 $(MAKE) _ci_parallel_tests_internal
 
 _ci_parallel_tests_internal:
-	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend selenium)
+	$(call run_comp_parallel_tests,$(COMPOSE_FILE_CI),postgres frontend backend selenium migrations seed_users)
 
 
 open_html_report:s

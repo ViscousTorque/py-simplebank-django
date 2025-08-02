@@ -14,7 +14,7 @@ def main():
     failures = 0
 
     for test_file in test_files:
-        print(f"\n🚀 Running {test_file}")
+        print(f"Running {test_file}")
         result = subprocess.run([sys.executable, str(test_file)])
         if result.returncode != 0:
             print(f"❌ Test {test_file.name} failed.")
