@@ -143,6 +143,7 @@ services:
     build:
       context: ./component_tests/pytest_selenium_tests
       dockerfile: Dockerfile.pytest_selenium_tests
+    cpus: 2
     networks:
       - bank-network
     depends_on:
@@ -183,6 +184,7 @@ services:
 
   selenium:
     image: selenium/standalone-chrome:123.0
+    cpus: 2
     container_name: selenium
     networks:
       - bank-network

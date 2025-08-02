@@ -28,7 +28,7 @@ redis:
 	docker run -d --rm --name redis -p 6379:6379 -d redis:7-alpine
 
 selenium:
-	docker run -d \
+	docker run -d --rm \
 	--name selenium \
 	--network bank-network \
 	--add-host=host.docker.internal:host-gateway \
@@ -76,9 +76,11 @@ startLocalEnv:
 	@$(MAKE) pgadmin4
 	@sleep 2
 	@$(MAKE) redis
+	@sleep 2
+	@$(MAKE) selenium
 
 stopLocalEnv:
-	docker stop redis pgadmin4 postgres
+	docker stop redis pgadmin4 postgres selenium
 
 server:
 	python manage.py runserver 5000

@@ -20,7 +20,7 @@ RUN pip install -v --no-cache-dir -r requirements.txt
 
 COPY . /app/component_tests/pytest_selenium_tests
 
-CMD ["pytest", "component_tests/pytest_selenium_tests", "-v", "--trace-config", "--tb=short", "--html=/reports/report.html", "--self-contained-html"]
+CMD ["pytest", "component_tests/pytest_selenium_tests", "-n", "4", "-v", "--trace-config", "--tb=short", "--html=/reports/report.html"]
 
 
 

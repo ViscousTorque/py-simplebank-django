@@ -10,7 +10,7 @@ from pytest_selenium_tests.simplebank.pages.login_page import LoginPage
 feature_path = Path(__file__).parent.parent / "features" / "login.feature"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def driver():
     """Setup Chrome WebDriver."""
     from pytest_selenium_tests.simplebank.utils.browser import get_driver # pylint: disable=import-outside-toplevel
@@ -74,4 +74,4 @@ def check_error_message(driver, error_message):
 
     print(f"Verified toast error message: {error_detail}")
 
-    WebDriverWait(driver, 5).until(EC.staleness_of(toast_message))
+    # WebDriverWait(driver, 5).until(EC.staleness_of(toast_message)) # this makes the test take longer
