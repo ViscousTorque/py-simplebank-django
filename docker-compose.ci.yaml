@@ -214,6 +214,18 @@ services:
       - backend
     environment:
       - baseUrl=http://backend:5000
+
+  robot_tests:
+    build:
+      context: ./component_tests/robot_framework_tests
+      dockerfile: Dockerfile.robot_tests
+    networks:
+      - bank-network
+    depends_on:
+      - backend
+    environment:
+      - BASE_URL=http://backend:5000
+
   
   unittests:
     build:
