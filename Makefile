@@ -164,7 +164,7 @@ endef
 
 COMPOSE_FILE_CI = docker-compose.ci.yaml
 COMPOSE_FILE_DEV = docker-compose.dev.yaml
-TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests postman_tests
+TEST_SERVICES = behave_selenium_tests pytest_selenium_tests pytest_playwright_tests playwright_codegen_tests postman_tests rest_assured_tests
 
 dev_comp_tests:
 	$(call run_comp_tests,$(COMPOSE_FILE_DEV),postgres frontend backend pgadmin4 selenium)

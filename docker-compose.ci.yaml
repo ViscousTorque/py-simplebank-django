@@ -204,6 +204,16 @@ services:
       newman run "3 newman py-simplebank.postman_collection.json"
       --env-var base_url=http://backend:5000
 
+  rest_assured_tests:
+    build:
+      context: ./component_tests/rest_assured_testng_tests
+      dockerfile: Dockerfile.rest_assured_testng
+    networks:
+      - bank-network
+    depends_on:
+      - backend
+    environment:
+      - baseUrl=http://backend:5000
   
   unittests:
     build:

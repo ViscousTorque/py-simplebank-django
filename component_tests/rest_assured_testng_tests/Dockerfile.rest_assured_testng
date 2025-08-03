@@ -1,0 +1,14 @@
+# Use a Maven + JDK image
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
+
+# Set workdir inside the container
+WORKDIR /app
+
+# Copy the full Maven project into the container
+COPY . .
+
+# Optionally pre-download dependencies (speeds up rebuilds)
+RUN mvn dependency:go-offline
+
+# Run tests (you can override this at runtime)
+CMD ["mvn", "clean", "test"]
