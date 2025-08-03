@@ -1,0 +1,6 @@
+FROM python:3.10-slim
+WORKDIR /robot-tests
+RUN pip install --no-cache-dir robotframework robotframework-requests
+COPY simplebank_api_tests.robot .
+
+CMD ["robot", "simplebank_api_tests.robot"]

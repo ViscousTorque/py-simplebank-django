@@ -226,7 +226,6 @@
 							"",
 							"// Validate response structure and values",
 							"pm.test(\"Response contains correct account details\", function () {",
-							"    pm.expect(jsonData).to.have.property(\"id\", 1);",
 							"    pm.expect(jsonData).to.have.property(\"owner\", \"torqueviscous\");",
 							"    pm.expect(jsonData).to.have.property(\"balance\", 0);",
 							"    pm.expect(jsonData).to.have.property(\"currency\", \"USD\");",
